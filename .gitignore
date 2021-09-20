@@ -1,0 +1,11 @@
+build/
+dist/
+torchvision.egg-info/
+dapi_lib/version.py
+*/**/__pycache__
+*/__pycache__
+*/*.pyc
+*/**/*.pyc
+*/**/**/*.pyc
+
+.idea/
