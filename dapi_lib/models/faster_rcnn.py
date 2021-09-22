@@ -1,13 +1,12 @@
 import warnings
 
-from torch import nn
 from typing import Any, Optional
 
 from . import resnet
 from ._api import Weights
 from .resnet import ResNet50Weights
 from ..datasets.mock import Coco
-from ..transforms.presets import CocoEval
+from ..transforms.vision_presets import CocoEval
 
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
 from torchvision.models.detection.faster_rcnn import FasterRCNN
@@ -70,7 +69,7 @@ class FasterRCNNResNet50FPNWeights(Weights):
 def fasterrcnn_resnet50_fpn(weights: Optional[FasterRCNNResNet50FPNWeights] = None,
                             weights_backbone: Optional[ResNet50Weights] = ResNet50Weights.ImageNet1K_RefV1,
                             progress: bool = True, num_classes: int = 91,
-                            trainable_backbone_layers: Optional[int] = None, **kwargs: Any) -> nn.Module:
+                            trainable_backbone_layers: Optional[int] = None, **kwargs: Any) -> FasterRCNN:
     # Backward compatibility for pretrained
     if "pretrained" in kwargs:
         warnings.warn("The argument pretrained is deprecated, please use weights instead.")
@@ -80,8 +79,11 @@ def fasterrcnn_resnet50_fpn(weights: Optional[FasterRCNNResNet50FPNWeights] = No
         weights_backbone = ResNet50Weights.ImageNet1K_RefV1 if kwargs.pop("pretrained_backbone") else None
 
     if weights is not None:
-        # no need to download the backbone if weights are set
+        # No need to download the backbone weights
         weights_backbone = None
+
+        # Adjust number of classes if necessary
+        num_classes = len(weights.meta['classes'])
 
     trainable_backbone_layers = _validate_trainable_layers(
         weights is not None or weights_backbone is not None, trainable_backbone_layers, 5, 3)

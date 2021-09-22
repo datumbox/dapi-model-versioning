@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from ._api import Weights
 from ..datasets.mock import ImageNet
-from ..transforms.presets import ImageNetEval
+from ..transforms.vision_presets import ImageNetEval
 
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
 from torchvision.models.resnet import Bottleneck, ResNet
@@ -29,6 +29,10 @@ def _resnet_v1_builder(arch: str, weights: Optional[Weights], progress: bool, **
         layers = [3, 4, 23, 3]
     else:
         raise ValueError(f"Unsupported model type {arch}")
+
+    # Adjust number of classes if necessary
+    if weights is not None:
+        kwargs['num_classes'] = len(weights.meta['classes'])
 
     # Initialize model
     model = ResNet(block, layers, **kwargs)
@@ -55,7 +59,7 @@ class ResNet50Weights(Weights):
     )
 
 
-def resnet50(weights: Optional[ResNet50Weights] = None, progress: bool = True, **kwargs: Any) -> nn.Module:
+def resnet50(weights: Optional[ResNet50Weights] = None, progress: bool = True, **kwargs: Any) -> ResNet:
     # Backward compatibility for pretrained
     if "pretrained" in kwargs:
         warnings.warn("The argument pretrained is deprecated, please use weights instead.")
@@ -73,7 +77,7 @@ class ResNext101Weights(Weights):
     )
 
 
-def resnext101_32x8d(weights: Optional[ResNext101Weights] = None, progress: bool = True, **kwargs: Any) -> nn.Module:
+def resnext101_32x8d(weights: Optional[ResNext101Weights] = None, progress: bool = True, **kwargs: Any) -> ResNet:
     # Backward compatibility for pretrained
     if "pretrained" in kwargs:
         warnings.warn("The argument pretrained is deprecated, please use weights instead.")
