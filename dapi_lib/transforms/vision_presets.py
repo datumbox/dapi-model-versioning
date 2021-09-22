@@ -1,11 +1,24 @@
 # These are example implementations similar to what we have on references.
-# Currently support only Tensor backend. Presets can be optionally nn.Modules and JIT-scriptable.
 # They will be adapted based on the work at https://github.com/pmeier/torchvision-datasets-rework/
 import torch
 
 from torch import Tensor, nn
-from typing import Tuple
+from typing import Any, Tuple, Union
 from torchvision import transforms as T
+from torchvision.transforms import functional as F
+
+
+# Allows to handle both PIL and Tensor images
+class ConvertImageDtype(nn.Module):
+
+    def __init__(self, dtype: torch.dtype) -> None:
+        super().__init__()
+        self.dtype = dtype
+
+    def forward(self, img: Tensor) -> Tensor:
+        if not isinstance(img, Tensor):
+            img = F.pil_to_tensor(img)
+        return F.convert_image_dtype(img, self.dtype)
 
 
 class ImageNetEval(nn.Module):
@@ -17,7 +30,7 @@ class ImageNetEval(nn.Module):
         self.transforms = T.Compose([
             T.Resize(resize_size, interpolation=interpolation),
             T.CenterCrop(crop_size),
-            T.ConvertImageDtype(dtype=torch.float),
+            ConvertImageDtype(dtype=torch.float),
             T.Normalize(mean=mean, std=std),
         ])
 
@@ -29,7 +42,7 @@ class CocoEval(nn.Module):
 
     def __init__(self) -> None:
         super().__init__()
-        self.transforms = T.ConvertImageDtype(dtype=torch.float)
+        self.transforms = ConvertImageDtype(dtype=torch.float)
 
     def forward(self, img: Tensor) -> Tensor:
         return self.transforms(img)

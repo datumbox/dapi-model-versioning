@@ -1,9 +1,9 @@
-from torchvision.io.image import read_image
+from PIL import Image
 
 from dapi_lib import models
 
 
-img = read_image("assets/puppies.jpg")
+img = Image.open("assets/puppies.jpg")
 
 # Initialize model, weights are optional
 weights = models.ResNet50Weights.ImageNet1K_RefV1
