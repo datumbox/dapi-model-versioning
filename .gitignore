@@ -9,3 +9,4 @@ dapi_lib/version.py
 */**/**/*.pyc
 
 .idea/
+output/

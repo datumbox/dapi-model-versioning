@@ -28,4 +28,6 @@ box = draw_bounding_boxes(img, boxes=prediction['boxes'],
                           labels=labels,
                           colors="red",
                           width=4, font_size=30)
-to_pil_image(box.detach()).show()
+im = to_pil_image(box.detach())
+im.save("./output/object-detection.jpg")
+im.show()
