@@ -13,7 +13,6 @@ from torchvision.models.resnet import Bottleneck, ResNet
 from torchvision.transforms import InterpolationMode
 
 
-# TODO: prove that this works with all the scenarios of changes.
 __all__ = ['ResNet', 'ResNet50Weights', 'resnet50', 'ResNext101Weights', 'resnext101_32x8d']
 
 
@@ -48,13 +47,14 @@ class ResNet50Weights(Weights):
     ImageNet1K_RefV1 = (
         'https://download.pytorch.org/models/resnet50-0676ba61.pth',
         partial(ImageNetEval, crop_size=224),
-        {'size': (224, 224), 'classes': ImageNet.classes},
+        {'size': (224, 224), 'classes': ImageNet.classes,
+         'recipe': 'https://github.com/pytorch/vision/tree/main/references/classification#resnext-50-32x4d'},
         False
     )
     ImageNet1K_RefV2 = (
         'https://download.pytorch.org/models/resnet50-0676ba61.pth',  # pretend these weights are different
         partial(ImageNetEval, crop_size=224, interpolation=InterpolationMode.BICUBIC),
-        {'size': (224, 224), 'classes': ImageNet.classes},
+        {'size': (224, 224), 'classes': ImageNet.classes, 'recipe': None},
         True
     )
 
@@ -72,7 +72,8 @@ class ResNext101Weights(Weights):
     ImageNet1K_RefV1 = (
         'https://download.pytorch.org/models/resnext101_32x8d-8ba56ff5.pth',
         partial(ImageNetEval, crop_size=224),
-        {'size': (224, 224), 'classes': ImageNet.classes},
+        {'size': (224, 224), 'classes': ImageNet.classes,
+         'recipe': 'https://github.com/pytorch/vision/tree/main/references/classification#resnext-101-32x8d'},
         True
     )
 

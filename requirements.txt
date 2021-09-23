@@ -1,0 +1,6 @@
+dataclasses>=0.6
+pillow>=8.1.0
+torch>=1.10.0.dev20210917
+torchvision>=0.11.0a0+3f212fe
+torchaudio>=0.10.0.dev20210922
+transformers>=4.9.2

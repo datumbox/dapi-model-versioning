@@ -3,7 +3,7 @@ import warnings
 from typing import Any, Optional
 
 from . import resnet
-from ._api import Weights
+from ._api import VersionedParams, Weights
 from .resnet import ResNet50Weights
 from ..datasets.mock import Coco
 from ..transforms.vision_presets import CocoEval
@@ -11,7 +11,6 @@ from ..transforms.vision_presets import CocoEval
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
 from torchvision.models.detection.faster_rcnn import FasterRCNN
 from torchvision.models.detection.backbone_utils import BackboneWithFPN, _validate_trainable_layers
-from torchvision.models.detection._utils import overwrite_eps
 from torchvision.ops import misc as misc_nn_ops
 from torchvision.ops.feature_pyramid_network import LastLevelMaxPool
 
@@ -19,11 +18,17 @@ from torchvision.ops.feature_pyramid_network import LastLevelMaxPool
 __all__ = ['FasterRCNN', 'FasterRCNNResNet50FPNWeights', 'fasterrcnn_resnet50_fpn']
 
 
+# Inherit to avoid copy-pasting the whole class, update TorchVision super class later.
+class FrozenBatchNorm2d(misc_nn_ops.FrozenBatchNorm2d):
+
+    def __init__(self, num_features: int, eps: float = 1e-5):
+        super().__init__(num_features, eps=VersionedParams.get(self, 'eps', eps))
+
 
 def _resnet_fpn_backbone(
     backbone_name,
     weights,
-    norm_layer=misc_nn_ops.FrozenBatchNorm2d,
+    norm_layer=FrozenBatchNorm2d,
     trainable_layers=3,
     returned_layers=None,
     extra_blocks=None
@@ -61,7 +66,8 @@ class FasterRCNNResNet50FPNWeights(Weights):
     Coco_RefV1 = (
         'https://download.pytorch.org/models/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth',
         CocoEval,
-        {'classes': Coco.classes},
+        {'classes': Coco.classes,
+         'recipe': 'https://github.com/pytorch/vision/tree/main/references/detection#faster-r-cnn-resnet-50-fpn'},
         True
     )
 
@@ -88,10 +94,11 @@ def fasterrcnn_resnet50_fpn(weights: Optional[FasterRCNNResNet50FPNWeights] = No
     trainable_backbone_layers = _validate_trainable_layers(
         weights is not None or weights_backbone is not None, trainable_backbone_layers, 5, 3)
 
-    backbone = _resnet_fpn_backbone('resnet50', weights_backbone, trainable_layers=trainable_backbone_layers)
-    model = FasterRCNN(backbone, num_classes, **kwargs)
+    with VersionedParams(FrozenBatchNorm2d, weights is not None, eps=0.0):
+        backbone = _resnet_fpn_backbone('resnet50', weights_backbone, trainable_layers=trainable_backbone_layers)
+        model = FasterRCNN(backbone, num_classes, **kwargs)
+
     if weights is not None:
         model.load_state_dict(weights.state_dict(progress=progress))
-        overwrite_eps(model, 0.0)
 
     return model
