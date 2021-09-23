@@ -26,10 +26,10 @@ Example:
 from torch import nn, Tensor
 from typing import Optional
 
-from dapi_lib.models._api import ContextParams, Weights
+from dapi_lib.models._api import register, ContextParams, Weights
 
 
-__all__ = ['BCBreaking', 'BCBreakingWeights', 'bc_model']
+__all__ = ['BCBreaking']
 
 
 class BCBreaking(nn.Module):
@@ -69,6 +69,7 @@ class BCBreakingWeights(Weights):
     )
 
 
+@register
 def bc_model(weights: Optional[BCBreakingWeights] = None) -> nn.Module:
     with ContextParams(BCBreaking, weights is None, init_attr='children'):
         model = BCBreaking()

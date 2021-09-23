@@ -22,11 +22,11 @@ from functools import partial
 from torch import nn, Tensor
 from typing import Any, Optional
 
-from dapi_lib.models._api import Weights
+from dapi_lib.models._api import register, Weights
 from dapi_lib.transforms.vision_presets import ConvertImageDtype
 
 
-__all__ = ['MySOTA', 'MySOTAWeights', 'mysota']
+__all__ = ['MySOTA']
 
 
 class MySOTA(nn.Module):
@@ -69,6 +69,7 @@ class MySOTAWeights(Weights):
     )
 
 
+@register
 def mysota(weights: Optional[MySOTAWeights] = None, progress: bool = True, **kwargs: Any) -> nn.Module:
     if weights is not None:
         kwargs['num_classes'] = len(weights.meta['classes'])

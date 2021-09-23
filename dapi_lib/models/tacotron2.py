@@ -4,14 +4,14 @@ import warnings
 from functools import partial
 from typing import Any, Optional
 
-from ._api import Weights
+from ._api import register, Weights
 from ..transforms.audio_presets import Text2Characters
 
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
 from torchaudio.models.tacotron2 import Tacotron2
 
 
-__all__ = ["Tacotron2", "Tacotron2Weights", "tacotron2"]
+__all__ = ["Tacotron2"]
 
 
 _DEFAULT_PARAMETERS = {
@@ -66,6 +66,7 @@ class Tacotron2Weights(Weights):
     )
 
 
+@register
 def tacotron2(n_symbol: Optional[int] = None, weights: Optional[Tacotron2Weights] = None, progress: bool = False,
               **kwargs: Any) -> Tacotron2:
     # Backward compatibility for checkpoint_name

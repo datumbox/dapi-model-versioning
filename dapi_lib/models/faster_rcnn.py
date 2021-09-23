@@ -4,7 +4,7 @@ from torch import nn
 from typing import Any, Optional
 
 from . import resnet
-from ._api import ContextParams, Weights
+from ._api import register, ContextParams, Weights
 from .resnet import ResNet50Weights
 from ..datasets.mock import Coco
 from ..transforms.vision_presets import CocoEval
@@ -16,7 +16,7 @@ from torchvision.ops import misc as misc_nn_ops
 from torchvision.ops.feature_pyramid_network import LastLevelMaxPool
 
 
-__all__ = ['FasterRCNN', 'FasterRCNNResNet50FPNWeights', 'fasterrcnn_resnet50_fpn']
+__all__ = ['FasterRCNN']
 
 
 # Inherit to avoid copy-pasting the whole classes. The changes should be upstreamed to parent classes.
@@ -81,6 +81,7 @@ class FasterRCNNResNet50FPNWeights(Weights):
     )
 
 
+@register
 def fasterrcnn_resnet50_fpn(weights: Optional[FasterRCNNResNet50FPNWeights] = None,
                             weights_backbone: Optional[ResNet50Weights] = ResNet50Weights.ImageNet1K_RefV1,
                             progress: bool = True, num_classes: int = 91,

@@ -4,7 +4,7 @@ from functools import partial
 from torch import nn
 from typing import Any, Optional
 
-from ._api import Weights
+from ._api import register, Weights
 from ..datasets.mock import ImageNet
 from ..transforms.vision_presets import ImageNetEval
 
@@ -13,7 +13,7 @@ from torchvision.models.resnet import Bottleneck, ResNet
 from torchvision.transforms import InterpolationMode
 
 
-__all__ = ['ResNet', 'ResNet50Weights', 'resnet50', 'ResNext101Weights', 'resnext101_32x8d']
+__all__ = ['ResNet']
 
 
 def _resnet_v1_builder(arch: str, weights: Optional[Weights], progress: bool, **kwargs: Any) -> nn.Module:
@@ -59,6 +59,7 @@ class ResNet50Weights(Weights):
     )
 
 
+@register
 def resnet50(weights: Optional[ResNet50Weights] = None, progress: bool = True, **kwargs: Any) -> ResNet:
     # Backward compatibility for pretrained
     if "pretrained" in kwargs:
@@ -78,6 +79,7 @@ class ResNext101Weights(Weights):
     )
 
 
+@register
 def resnext101_32x8d(weights: Optional[ResNext101Weights] = None, progress: bool = True, **kwargs: Any) -> ResNet:
     # Backward compatibility for pretrained
     if "pretrained" in kwargs:

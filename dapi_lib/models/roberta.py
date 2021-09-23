@@ -3,10 +3,7 @@ from transformers import RobertaTokenizer, RobertaModel
 from functools import partial
 from torch import nn
 
-from ._api import Weights
-
-
-__all__= ["RobertaWeights", "roberta"]
+from ._api import register, Weights
 
 
 class RobertaWeights(Weights):
@@ -24,6 +21,7 @@ class RobertaWeights(Weights):
     )
 
 
+@register
 def roberta(weights: RobertaWeights) -> nn.Module:
     model = RobertaModel.from_pretrained(weights.url)
     return model

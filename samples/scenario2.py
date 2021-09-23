@@ -24,13 +24,13 @@ Example:
 from torch import nn, Tensor
 from typing import Optional
 
-from dapi_lib.models._api import ContextParams, Weights
+from dapi_lib.models._api import register, ContextParams, Weights
 
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
 from torchvision.ops.misc import FrozenBatchNorm2d
 
 
-__all__ = ['Dummy', 'DummyWeights', 'dummy']
+__all__ = ['Dummy']
 
 
 # Note: The only reason why we inherit instead of making the changes directly to FrozenBatchNorm2d is to avoid
@@ -61,6 +61,7 @@ class DummyWeights(Weights):
     )
 
 
+@register
 def dummy(weights: Optional[DummyWeights] = None) -> nn.Module:
     with ContextParams(MyFrozenBN, weights is not None, eps=0.0):
         model = Dummy()
