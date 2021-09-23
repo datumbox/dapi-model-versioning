@@ -22,8 +22,8 @@ from functools import partial
 from torch import nn, Tensor
 from typing import Any, Optional
 
-from ..models._api import Weights
-from ..transforms.vision_presets import ConvertImageDtype
+from dapi_lib.models._api import Weights
+from dapi_lib.transforms.vision_presets import ConvertImageDtype
 
 
 __all__ = ['MySOTA', 'MySOTAWeights', 'mysota']
@@ -50,19 +50,19 @@ class MySOTA(nn.Module):
 
 class MySOTAWeights(Weights):
     NOTHOTDOG = (
-        'https://download.pytorch.org/models/not-hot-dog_weights.pth',
+        'https://fake/models/not-hot-dog_weights.pth',
         partial(ConvertImageDtype, dtype=torch.float16),
         {'size': (32, 32), 'classes': ['not hotdog', 'hotdog']},
         True
     )
     CATDOG_v1 = (
-        'https://download.pytorch.org/models/catdog_weights_v1.pth',
+        'https://fake/models/catdog_weights_v1.pth',
         partial(ConvertImageDtype, dtype=torch.float32),
         {'size': (32, 32), 'classes': ['cat', 'dog']},
         False
     )
     CATDOG_v2 = (
-        'https://download.pytorch.org/models/catdog_weights_v2.pth',
+        'https://fake/models/catdog_weights_v2.pth',
         partial(ConvertImageDtype, dtype=torch.float16),
         {'size': (64, 64), 'classes': ['cat', 'dog']},
         True
@@ -75,7 +75,16 @@ def mysota(weights: Optional[MySOTAWeights] = None, progress: bool = True, **kwa
 
     model = MySOTA(**kwargs)
 
-    if weights is not None:
+    if weights is not None and 'fake' not in weights.url:
         model.load_state_dict(weights.state_dict(progress=progress))
 
     return model
+
+
+if __name__ == "__main__":
+    m1 = mysota(MySOTAWeights.CATDOG_v1)
+    v1 = sum(x.numel() for x in m1.parameters())
+
+    m2 = mysota()
+    v2 = sum(x.numel() for x in m1.parameters())
+    assert v1 == v2

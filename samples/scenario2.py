@@ -24,7 +24,7 @@ Example:
 from torch import nn, Tensor
 from typing import Optional
 
-from ..models._api import ContextParams, Weights
+from dapi_lib.models._api import ContextParams, Weights
 
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
 from torchvision.ops.misc import FrozenBatchNorm2d
@@ -54,7 +54,7 @@ class Dummy(nn.Module):
 
 class DummyWeights(Weights):
     DUMMY = (
-        'https://download.pytorch.org/models/dummy_weights.pth',
+        'https://fake/models/dummy_weights.pth',
         None,
         {},
         True
@@ -65,7 +65,15 @@ def dummy(weights: Optional[DummyWeights] = None) -> nn.Module:
     with ContextParams(MyFrozenBN, weights is not None, eps=0.0):
         model = Dummy()
 
-    if weights is not None:
+    if weights is not None and 'fake' not in weights.url:
         model.load_state_dict(weights.state_dict(progress=False))
 
     return model
+
+
+if __name__ == "__main__":
+    m = dummy(weights=DummyWeights.DUMMY)
+    assert m.bn.eps == 0.0
+
+    m = dummy()
+    assert m.bn.eps == 1e-5

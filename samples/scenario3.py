@@ -26,7 +26,7 @@ Example:
 from torch import nn, Tensor
 from typing import Optional
 
-from ..models._api import ContextParams, Weights
+from dapi_lib.models._api import ContextParams, Weights
 
 
 __all__ = ['BCBreaking', 'BCBreakingWeights', 'bc_model']
@@ -44,7 +44,10 @@ class BCBreaking(nn.Module):
         attr = ContextParams.get(self, 'init_attr', 'modules')
         for m in getattr(self, attr)():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_uniform_(m.weight, a=1)
+                nn.init.constant_(m.weight, 0)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 0)
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x: Tensor) -> Tensor:
@@ -59,7 +62,7 @@ class BCBreakingWeights(Weights):
         False
     )
     NEW = (
-        'https://download.pytorch.org/models/new_weights.pth',
+        'https://fake/models/new_weights.pth',
         None,
         {},
         True
@@ -70,7 +73,15 @@ def bc_model(weights: Optional[BCBreakingWeights] = None) -> nn.Module:
     with ContextParams(BCBreaking, weights is None, init_attr='children'):
         model = BCBreaking()
 
-    if weights is not None:
+    if weights is not None and 'fake' not in weights.url:
         model.load_state_dict(weights.state_dict(progress=False))
 
     return model
+
+
+if __name__ == "__main__":
+    m = bc_model(BCBreakingWeights.NEW)
+    assert sum(x.sum() for x in m.parameters()) == 0.0
+
+    m = bc_model()
+    assert sum(x.sum() for x in m.parameters()) != 0.0
