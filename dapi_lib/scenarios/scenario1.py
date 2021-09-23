@@ -1,9 +1,9 @@
 """
 Scenario:
-    1. Different model weights
+    1. Same code, different model weights (BC)
 
 Description:
-    Provide different pre-trained weights to the same model. All default hyper-params and code remain the same.
+    Provide different pre-trained weights for the same model. All default hyper-params and code remain the same.
 
 Example:
     https://github.com/pytorch/vision/issues/3995
@@ -12,6 +12,8 @@ Example:
     1. We improved the previous weights by using a new training recipe.
     2. We provide additional weights trained on a different dataset (COCO vs Pascal VOC).
 
+    Here we propose a mechanism which allows us to keep track of different weights with different meta-data and preset
+    transforms using the same model builder method.
 """
 
 import torch

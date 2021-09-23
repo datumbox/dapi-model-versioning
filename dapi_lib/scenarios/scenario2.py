@@ -15,9 +15,11 @@ Example:
     The original value of eps of the `FrozenBatchNorm2d` was `0.0` but was causing training stability problems.
     We considered it a bug and thus we BC-broke by updating the default value to `1e-5` in the class. Nevertheless
     previously trained models had to continue using `0.0`. To resolve it we introduced the method
-    `torchvision.models.detection._utils.overwrite_eps()` to overwrite the epsilon values of all FrozenBN layers.
+    `torchvision.models.detection._utils.overwrite_eps()` to overwrite the epsilon values of all FrozenBN layers
+    after they have been created.
 
-    Here we propose an alternative mechanism which allows to temporarily overwrite values using Context Managers.
+    Here we propose an alternative mechanism which allows to overwrite the default values during object construction
+    using Context Managers.
 """
 from torch import nn, Tensor
 from typing import Optional

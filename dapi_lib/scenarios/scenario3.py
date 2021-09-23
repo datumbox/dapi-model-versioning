@@ -9,7 +9,6 @@ Description:
 Example:
     https://github.com/pytorch/vision/issues/2326
     https://github.com/pytorch/vision/pull/2954
-    https://github.com/pytorch/vision/pull/3205
 
     The original `FeaturePyramidNetwork` had a bug on its initialization and instead of initializing all of the modules
     of the model, it was doing it for only the direct children. Fixing the bug didn't affect the model architecture, in
