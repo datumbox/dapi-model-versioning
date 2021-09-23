@@ -16,12 +16,13 @@ Example:
     We considered it a bug and thus we BC-broke by updating the default value to `1e-5` in the class. Nevertheless
     previously trained models had to continue using `0.0`. To resolve it we introduced the method
     `torchvision.models.detection._utils.overwrite_eps()` to overwrite the epsilon values of all FrozenBN layers.
+
     Here we propose an alternative mechanism which allows to temporarily overwrite values using Context Managers.
 """
 from torch import nn, Tensor
 from typing import Optional
 
-from ..models._api import VersionedParams, Weights
+from ..models._api import ContextParams, Weights
 
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
 from torchvision.ops.misc import FrozenBatchNorm2d
@@ -35,7 +36,7 @@ __all__ = ['Dummy', 'DummyWeights', 'dummy']
 class MyFrozenBN(FrozenBatchNorm2d):
 
     def __init__(self, num_features: int, eps: float = 1e-5):
-        super().__init__(num_features, eps=VersionedParams.get(self, 'eps', eps))
+        super().__init__(num_features, eps=ContextParams.get(self, 'eps', eps))
 
 
 class Dummy(nn.Module):
@@ -59,7 +60,7 @@ class DummyWeights(Weights):
 
 
 def dummy(weights: Optional[DummyWeights] = None) -> nn.Module:
-    with VersionedParams(MyFrozenBN, weights is not None, eps=0.0):
+    with ContextParams(MyFrozenBN, weights is not None, eps=0.0):
         model = Dummy()
 
     if weights is not None:

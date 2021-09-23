@@ -9,10 +9,10 @@ from typing import Any, Callable, Dict, List
 from torchvision._internally_replaced_utils import load_state_dict_from_url
 
 
-__all__ = ['VersionedParams', 'Weights']
+__all__ = ['ContextParams', 'Weights']
 
 
-class VersionedParams(contextlib.ContextDecorator):
+class ContextParams(contextlib.ContextDecorator):
 
     _QUEUE_NAME = "_queued_params"
     _OVERWRITE_NAME = "_overwritten_params"
@@ -24,34 +24,34 @@ class VersionedParams(contextlib.ContextDecorator):
 
     @staticmethod
     def get(object: Any, key: str, default: Any) -> Any:
-        params = getattr(object, VersionedParams._OVERWRITE_NAME, None)
+        params = getattr(object, ContextParams._OVERWRITE_NAME, None)
         return default if params is None else params.get(key, default)
 
     def __enter__(self):
         if self.active:
-            queue = getattr(self.klass, VersionedParams._QUEUE_NAME, [])
+            queue = getattr(self.klass, ContextParams._QUEUE_NAME, [])
             queue.append(self.params)
 
             overwrites = {}
             for p in queue:
                 overwrites.update(p)
 
-            setattr(self.klass, VersionedParams._QUEUE_NAME, queue)
-            setattr(self.klass, VersionedParams._OVERWRITE_NAME, overwrites)
+            setattr(self.klass, ContextParams._QUEUE_NAME, queue)
+            setattr(self.klass, ContextParams._OVERWRITE_NAME, overwrites)
 
         return self
 
     def __exit__(self, *exc):
         if self.active:
-            queue = getattr(self.klass, VersionedParams._QUEUE_NAME, None)
+            queue = getattr(self.klass, ContextParams._QUEUE_NAME, None)
             if queue:
                 if len(queue) > 1:
                     queue.pop()
                 else:
-                    delattr(self.klass, VersionedParams._QUEUE_NAME)
+                    delattr(self.klass, ContextParams._QUEUE_NAME)
 
-            if hasattr(self.klass, VersionedParams._OVERWRITE_NAME):
-                delattr(self.klass, VersionedParams._OVERWRITE_NAME)
+            if hasattr(self.klass, ContextParams._OVERWRITE_NAME):
+                delattr(self.klass, ContextParams._OVERWRITE_NAME)
 
         return False
 
