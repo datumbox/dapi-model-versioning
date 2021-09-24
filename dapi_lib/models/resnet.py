@@ -66,6 +66,9 @@ def resnet50(weights: Optional[ResNet50Weights] = None, progress: bool = True, *
         warnings.warn("The argument pretrained is deprecated, please use weights instead.")
         weights = ResNet50Weights.ImageNet1K_RefV1 if kwargs.pop("pretrained") else None
 
+    # Confirm we got the right weights
+    ResNet50Weights.check_type(weights)
+
     return _resnet_v1_builder('resnet50', weights, progress, **kwargs)
 
 
@@ -85,5 +88,8 @@ def resnext101_32x8d(weights: Optional[ResNext101Weights] = None, progress: bool
     if "pretrained" in kwargs:
         warnings.warn("The argument pretrained is deprecated, please use weights instead.")
         weights = ResNext101Weights.ImageNet1K_RefV1 if kwargs.pop("pretrained") else None
+
+    # Confirm we got the right weights
+    ResNext101Weights.check_type(weights)
 
     return _resnet_v1_builder('resnext101_32x8d', weights, progress, **kwargs)

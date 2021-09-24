@@ -4,9 +4,9 @@ from dapi_lib import models
 text = "Hello World!"
 
 # Initialize model
-#weights = models.RobertaWeights.BASE
-#model = models.roberta(weights)
-model, weights = models.get('roberta', models.RobertaWeights.BASE)
+weights = models.RobertaWeights.BASE
+model = models.roberta(weights)
+# model, weights = models.get('roberta', models.RobertaWeights.BASE)
 
 model.eval()
 

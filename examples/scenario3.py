@@ -41,6 +41,8 @@ class BCBreaking(nn.Module):
             nn.ReLU()
         )
 
+        # The ContextParams.get() is used to overwrite the default behaviour of the class and change the init scheme.
+        # This can be achieved without adding additional arguments in the constructor.
         attr = ContextParams.get(self, 'init_attr', 'modules')
         for m in getattr(self, attr)():
             if isinstance(m, nn.Conv2d):
@@ -71,6 +73,8 @@ class BCBreakingWeights(Weights):
 
 @register
 def bc_model(weights: Optional[BCBreakingWeights] = None) -> nn.Module:
+    BCBreakingWeights.check_type(weights)
+
     with ContextParams(BCBreaking, weights is None, init_attr='children'):
         model = BCBreaking()
 

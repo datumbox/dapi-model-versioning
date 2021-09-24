@@ -6,13 +6,13 @@ from dapi_lib import models
 img = Image.open("assets/puppies.jpg")
 
 # Initialize model, weights are optional
-#weights = models.ResNet50Weights.ImageNet1K_RefV1
-#model = models.resnet50(weights=weights)
-model, weights = models.get('resnext101_32x8d')
+weights = models.ResNet50Weights.ImageNet1K_RefV1
+model = models.resnet50(weights=weights)
+# model, weights = models.get('resnext101_32x8d')
 
 model.eval()
 
-# Transforms need to be initialized when needed because they might have memory
+# Initialize inference transforms
 preprocess = weights.transforms()
 
 # Apply inference presets

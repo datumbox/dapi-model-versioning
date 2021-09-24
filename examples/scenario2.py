@@ -33,11 +33,12 @@ from torchvision.ops.misc import FrozenBatchNorm2d
 __all__ = ['Dummy']
 
 
-# Note: The only reason why we inherit instead of making the changes directly to FrozenBatchNorm2d is to avoid
-# copy pasting a lot of code from TorchVision. The changes below should happen on the parent class.
+# The only reason why we inherit instead of making the changes directly to FrozenBatchNorm2d is to avoid copy-pasting
+# a lot of code from TorchVision. The changes below should happen on the parent class.
 class MyFrozenBN(FrozenBatchNorm2d):
 
     def __init__(self, num_features: int, eps: float = 1e-5):
+        # Below the ContextParams.get() is used to overwrite the default value of the class under specific conditions.
         super().__init__(num_features, eps=ContextParams.get(self, 'eps', eps))
 
 
@@ -63,6 +64,9 @@ class DummyWeights(Weights):
 
 @register
 def dummy(weights: Optional[DummyWeights] = None) -> nn.Module:
+    DummyWeights.check_type(weights)
+
+    # Overwrites the default epsilon only when the weights is specified
     with ContextParams(MyFrozenBN, weights is not None, eps=0.0):
         model = Dummy()
 

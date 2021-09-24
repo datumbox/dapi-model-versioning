@@ -30,6 +30,8 @@ from dapi_lib.transforms.vision_presets import ConvertImageDtype
 __all__ = ['MySOTA']
 
 
+# This module stores the main implementation of the architecture. Usually there is one such class per model,
+# nevertheless it doesn't have to be the case.
 class MySOTA(nn.Module):
     def __init__(self, num_classes: int = 1000, **kwargs: Any) -> None:
         super().__init__()
@@ -49,12 +51,14 @@ class MySOTA(nn.Module):
         return self.classifier(x.flatten(start_dim=1))
 
 
+# Each model weights class inherits from the Weight class and must provide all mandatory fields. These fields can be
+# easily adapted to the needs of the project.
 class MySOTAWeights(Weights):
     NOTHOTDOG = (
-        'https://fake/models/not-hot-dog_weights.pth',
-        partial(ConvertImageDtype, dtype=torch.float16),
-        {'size': (32, 32), 'classes': ['not hotdog', 'hotdog']},
-        True
+        'https://fake/models/not-hot-dog_weights.pth',  # Weight URL
+        partial(ConvertImageDtype, dtype=torch.float16),  # Constructor for preprocessing transforms
+        {'size': (32, 32), 'classes': ['not hotdog', 'hotdog']},  # Arbitrary Meta-Data associated with the weights
+        True  # Flag that indicates whether it's the latest available weights for the specific Dataset/Taxonomy combo.
     )
     CATDOG_v1 = (
         'https://fake/models/catdog_weights_v1.pth',
@@ -70,8 +74,16 @@ class MySOTAWeights(Weights):
     )
 
 
+# Each model variant (such as `resnet18`, `resnet50` etc) has its own public building method and receives an optional
+# `weights` parameter. The type of the `weights` param is uniquely associated with the specific builder method. This
+# makes it easier to document the available models and find all the available pre-trained weights via static analysis.
+# Here we also show-case an optional registration mechanism that adds the builder and its weight class to the public
+# API of the module.
 @register
 def mysota(weights: Optional[MySOTAWeights] = None, progress: bool = True, **kwargs: Any) -> nn.Module:
+    # Confirm we got the right weights
+    MySOTAWeights.check_type(weights)
+
     if weights is not None:
         kwargs['num_classes'] = len(weights.meta['classes'])
 
@@ -98,6 +110,9 @@ class MySOTAV2Weights(Weights):
 # https://github.com/pytorch/pytorch/blob/294db060/torch/nn/quantized/dynamic/modules/linear.py#L44-L49
 @register
 def mysota_v2(weights: Optional[MySOTAV2Weights] = None, progress: bool = True, **kwargs: Any) -> nn.Module:
+    # Confirm we got the right weights
+    MySOTAV2Weights.check_type(weights)
+
     if weights is not None:
         kwargs['num_classes'] = len(weights.meta['classes'])
 
@@ -116,3 +131,5 @@ if __name__ == "__main__":
     m2 = mysota()
     v2 = sum(x.numel() for x in m1.parameters())
     assert v1 == v2
+
+    mysota_v2(MySOTAV2Weights.NOTHOTDOG)

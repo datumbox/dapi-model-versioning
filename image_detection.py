@@ -9,13 +9,13 @@ from dapi_lib import models
 img = read_image("assets/puppies.jpg")
 
 # Initialize model, weights are optional
-#weights = models.FasterRCNNResNet50FPNWeights.Coco_RefV1
-#model = models.fasterrcnn_resnet50_fpn(weights=weights)
-model, weights = models.get('fasterrcnn_resnet50_fpn')
+weights = models.FasterRCNNResNet50FPNWeights.Coco_RefV1
+model = models.fasterrcnn_resnet50_fpn(weights=weights)
+# model, weights = models.get('fasterrcnn_resnet50_fpn')
 
 model.eval()
 
-# Transforms need to be initialized when needed because they might have memory
+# Initialize inference transforms
 preprocess = weights.transforms()
 
 # Apply inference presets

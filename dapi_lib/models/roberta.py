@@ -23,5 +23,8 @@ class RobertaWeights(Weights):
 
 @register
 def roberta(weights: RobertaWeights) -> nn.Module:
+    # Confirm we got the right weights
+    RobertaWeights.check_type(weights)
+
     model = RobertaModel.from_pretrained(weights.url)
     return model

@@ -11,13 +11,13 @@ from dapi_lib import models
 text = "Hello world!"
 
 # Initialize model, weights are optional
-#weights = models.Tacotron2Weights.Characters_WaveRNN_LJSpeech
-#model = models.tacotron2(weights=weights)
-model, weights = models.get('tacotron2', models.Tacotron2Weights.Characters_WaveRNN_LJSpeech)
+weights = models.Tacotron2Weights.Characters_WaveRNN_LJSpeech
+model = models.tacotron2(weights=weights)
+# model, weights = models.get('tacotron2', models.Tacotron2Weights.Characters_WaveRNN_LJSpeech)
 
 model.eval()
 
-# Transforms need to be initialized when needed because they might have memory
+# Initialize inference transforms
 preprocess = weights.transforms()
 
 # Apply inference presets
@@ -30,7 +30,7 @@ with torch.no_grad():
 # Show number of symbols and spectrogram shape
 print(weights.meta['n_symbol'], mel_specgram.shape)
 
-# Use standard torchaudio to convert to wave file
+# Use standard torchaudio code to convert spectrogram to wave file
 wavernn_model = wavernn("wavernn_10k_epochs_8bits_ljspeech").eval()
 wavernn_inference_model = WaveRNNInferenceWrapper(wavernn_model)
 transforms = torch.nn.Sequential(InverseSpectralNormalization(), NormalizeDB(min_level_db=-100, normalization=True))

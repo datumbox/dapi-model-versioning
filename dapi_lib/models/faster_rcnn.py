@@ -86,6 +86,10 @@ def fasterrcnn_resnet50_fpn(weights: Optional[FasterRCNNResNet50FPNWeights] = No
         warnings.warn("The argument pretrained_backbone is deprecated, please use weights_backbone instead.")
         weights_backbone = ResNet50Weights.ImageNet1K_RefV1 if kwargs.pop("pretrained_backbone") else None
 
+    # Confirm we got the right weights
+    FasterRCNNResNet50FPNWeights.check_type(weights)
+    ResNet50Weights.check_type(weights_backbone)
+
     if weights is not None:
         # No need to download the backbone weights
         weights_backbone = None

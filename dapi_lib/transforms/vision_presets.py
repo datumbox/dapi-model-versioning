@@ -3,7 +3,7 @@
 import torch
 
 from torch import Tensor, nn
-from typing import Any, Tuple, Union
+from typing import Tuple
 from torchvision import transforms as T
 from torchvision.transforms import functional as F
 

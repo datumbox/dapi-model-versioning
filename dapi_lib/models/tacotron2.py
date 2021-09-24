@@ -77,6 +77,9 @@ def tacotron2(n_symbol: Optional[int] = None, weights: Optional[Tacotron2Weights
         if weights is None:
             raise ValueError(f"Unexpected checkpoint_name: '{checkpoint_name}'. ")
 
+    # Confirm we got the right weights
+    Tacotron2Weights.check_type(weights)
+
     if n_symbol is None and weights is None:
         raise ValueError("Both n_symbol and weights can't be None.")
 
