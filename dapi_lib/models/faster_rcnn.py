@@ -1,6 +1,5 @@
 import warnings
 
-from torch import nn
 from typing import Any, Optional
 
 from . import resnet
@@ -10,7 +9,7 @@ from ..datasets.mock import Coco
 from ..transforms.vision_presets import CocoEval
 
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
-from torchvision.models.detection import faster_rcnn
+from torchvision.models.detection.faster_rcnn import FasterRCNN
 from torchvision.models.detection.backbone_utils import BackboneWithFPN, _validate_trainable_layers
 from torchvision.ops import misc as misc_nn_ops
 from torchvision.ops.feature_pyramid_network import LastLevelMaxPool
@@ -19,18 +18,11 @@ from torchvision.ops.feature_pyramid_network import LastLevelMaxPool
 __all__ = ['FasterRCNN']
 
 
-# Inherit to avoid copy-pasting the whole classes. The changes should be upstreamed to parent classes.
+# Inherit to avoid copy-pasting the whole class. The changes should be upstreamed to parent class.
 class FrozenBatchNorm2d(misc_nn_ops.FrozenBatchNorm2d):
 
     def __init__(self, num_features: int, eps: float = 1e-5):
         super().__init__(num_features, eps=ContextParams.get(self, 'eps', eps))
-
-
-class FasterRCNN(faster_rcnn.FasterRCNN):
-
-    def __init__(self, backbone: nn.Module, rpn_score_thresh: float = 0.05, **kwargs: Any):
-        super().__init__(backbone, rpn_score_thresh=ContextParams.get(self, 'rpn_score_thresh', rpn_score_thresh),
-                         **kwargs)
 
 
 
@@ -104,8 +96,7 @@ def fasterrcnn_resnet50_fpn(weights: Optional[FasterRCNNResNet50FPNWeights] = No
     trainable_backbone_layers = _validate_trainable_layers(
         weights is not None or weights_backbone is not None, trainable_backbone_layers, 5, 3)
 
-    with ContextParams(FasterRCNN, True, rpn_score_thresh=0.0), \
-         ContextParams(FrozenBatchNorm2d, weights is not None, eps=0.0):
+    with ContextParams(FrozenBatchNorm2d, weights is not None, eps=0.0):
         backbone = _resnet_fpn_backbone('resnet50', weights_backbone, trainable_layers=trainable_backbone_layers)
         model = FasterRCNN(backbone, num_classes=num_classes, **kwargs)
 
