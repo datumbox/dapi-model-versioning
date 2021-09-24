@@ -13,7 +13,8 @@ Example:
     2. We provide additional weights trained on a different dataset (COCO vs Pascal VOC).
 
     Here we propose a mechanism which allows us to keep track of different weights with different meta-data and preset
-    transforms using the same model builder method.
+    transforms using the same model builder method. We also propose a way to handle significant changes on the models
+    by introducing new model builder methods.
 """
 
 import torch
@@ -30,7 +31,7 @@ __all__ = ['MySOTA']
 
 
 class MySOTA(nn.Module):
-    def __init__(self, num_classes: int = 1000) -> None:
+    def __init__(self, num_classes: int = 1000, **kwargs: Any) -> None:
         super().__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, 3),
@@ -75,6 +76,32 @@ def mysota(weights: Optional[MySOTAWeights] = None, progress: bool = True, **kwa
         kwargs['num_classes'] = len(weights.meta['classes'])
 
     model = MySOTA(**kwargs)
+
+    if weights is not None and 'fake' not in weights.url:
+        model.load_state_dict(weights.state_dict(progress=progress))
+
+    return model
+
+
+class MySOTAV2Weights(Weights):
+    NOTHOTDOG = (
+        'https://fake/models/not-hot-dog_weights_v2.pth',
+        partial(ConvertImageDtype, dtype=torch.float16),
+        {'size': (32, 32), 'classes': ['not hotdog', 'hotdog']},
+        True
+    )
+
+
+# If significant changes are needed for a model, these should be added on a new model builder to maintain BC.
+# Whether or not we will introduce a new `MySOTAV2` class depends on how similar the two are and it should be
+# assessed on a case-by-case basis. See https://github.com/pytorch/vision/pull/1224 and
+# https://github.com/pytorch/pytorch/blob/294db060/torch/nn/quantized/dynamic/modules/linear.py#L44-L49
+@register
+def mysota_v2(weights: Optional[MySOTAV2Weights] = None, progress: bool = True, **kwargs: Any) -> nn.Module:
+    if weights is not None:
+        kwargs['num_classes'] = len(weights.meta['classes'])
+
+    model = MySOTA(version=2, **kwargs)  # here we assume we keep the same class rather than creating a MySOTAV2
 
     if weights is not None and 'fake' not in weights.url:
         model.load_state_dict(weights.state_dict(progress=progress))
