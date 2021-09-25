@@ -32,5 +32,7 @@ box = draw_bounding_boxes(img, boxes=prediction['boxes'],
                           width=4, font_size=30)
 im = to_pil_image(box.detach())
 Path("./output").mkdir(parents=True, exist_ok=True)
-im.save("./output/object-detection.jpg")
+path = "./output/object-detection.jpg"
+print(f"Saving picture at {path}")
+im.save(path)
 im.show()

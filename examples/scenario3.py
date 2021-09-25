@@ -13,7 +13,7 @@ Example:
     The original `FeaturePyramidNetwork` had a bug on its initialization and instead of initializing all of the modules
     of the model, it was doing it for only the direct children. Fixing the bug didn't affect the model architecture, in
     other words the old pre-trained weights continued to work fine on the new code. Nevertheless training a new model
-    using the updated code leads to different results.
+    using the updated code led to different results.
 
     Obviously when it comes to bug fixing, maintaining BC makes no sense. But let's assume we do want to introduce a
     BC-breaking change (perhaps a significant improvement on training or inference) but also allow users to access the
@@ -42,7 +42,7 @@ class BCBreaking(nn.Module):
         )
 
         # The ContextParams.get() is used to overwrite the default behaviour of the class and change the init scheme.
-        # This can be achieved without adding additional arguments in the constructor.
+        # This can be achieved without adding additional arguments to the constructor.
         attr = ContextParams.get(self, 'init_attr', 'modules')
         for m in getattr(self, attr)():
             if isinstance(m, nn.Conv2d):

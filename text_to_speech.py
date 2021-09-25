@@ -38,4 +38,6 @@ mel_specgram = transforms(mel_specgram)
 with torch.no_grad():
     waveform = wavernn_inference_model(mel_specgram, mulaw=True, batched=True, timesteps=100, overlap=5)
 Path("./output").mkdir(parents=True, exist_ok=True)
-torchaudio.save("./output/message.wav", waveform, sample_rate=22050)
+path = "./output/message.wav"
+print(f"Saving wave at {path}")
+torchaudio.save(path, waveform, sample_rate=22050)

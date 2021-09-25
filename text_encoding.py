@@ -13,7 +13,7 @@ model.eval()
 # Initialize tokenizer
 tokenizer = weights.transforms()
 
-# Tokenize
+# Tokenize input
 encoded_input = tokenizer(text)
 
 # Apply model

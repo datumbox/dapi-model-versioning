@@ -138,7 +138,7 @@ class ContextParams(contextlib.ContextDecorator):
 _MODEL_METHODS: Dict[str, Tuple[Callable, Optional[Weights]]] = {}
 
 
-# Special type of internal weight that signals the use of the latest weights
+# Special type of internal enum that signals the use of the latest weights
 class _LatestWeights(Weights):
     LATEST = (None, None, None, None)
 

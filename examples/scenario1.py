@@ -1,14 +1,15 @@
 """
 Scenario:
-    1. Same code, different model weights (BC)
+    1. Multi-weight and Multi-version support (BC)
 
 Description:
-    Provide different pre-trained weights for the same model. All default hyper-params and code remain the same.
+    Provide different pre-trained weights for the same model version and allow for multiple code versions for the same
+    model variant.
 
 Example:
     https://github.com/pytorch/vision/issues/3995
 
-    Providing different pre-trained weights might be necessary because:
+    Providing different pre-trained weights for the same model version might be necessary because:
     1. We improved the previous weights by using a new training recipe.
     2. We provide additional weights trained on a different dataset (COCO vs Pascal VOC).
 

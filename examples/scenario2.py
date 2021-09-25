@@ -12,7 +12,7 @@ Example:
     https://github.com/pytorch/vision/pull/2933
     https://github.com/pytorch/vision/pull/2940
 
-    The original value of eps of the `FrozenBatchNorm2d` was `0.0` but was causing training stability problems.
+    The original value of eps of the `FrozenBatchNorm2d` was `0.0` and was causing training stability problems.
     We considered it a bug and thus we BC-broke by updating the default value to `1e-5` in the class. Nevertheless
     previously trained models had to continue using `0.0`. To resolve it we introduced the method
     `torchvision.models.detection._utils.overwrite_eps()` to overwrite the epsilon values of all FrozenBN layers
@@ -66,7 +66,7 @@ class DummyWeights(Weights):
 def dummy(weights: Optional[DummyWeights] = None) -> nn.Module:
     DummyWeights.check_type(weights)
 
-    # Overwrites the default epsilon only when the weights is specified
+    # Overwrites the default epsilon only when the weights parameter is specified
     with ContextParams(MyFrozenBN, weights is not None, eps=0.0):
         model = Dummy()
 

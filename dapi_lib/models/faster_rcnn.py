@@ -18,7 +18,7 @@ from torchvision.ops.feature_pyramid_network import LastLevelMaxPool
 __all__ = ['FasterRCNN']
 
 
-# Inherit to avoid copy-pasting the whole class. The changes should be upstreamed to parent class.
+# Inherit to avoid copy-pasting the whole class. The changes should be upstreamed to the parent class.
 class FrozenBatchNorm2d(misc_nn_ops.FrozenBatchNorm2d):
 
     def __init__(self, num_features: int, eps: float = 1e-5):
@@ -100,6 +100,7 @@ def fasterrcnn_resnet50_fpn(weights: Optional[FasterRCNNResNet50FPNWeights] = No
     trainable_backbone_layers = _validate_trainable_layers(
         weights is not None or weights_backbone is not None, trainable_backbone_layers, 5, 3)
 
+    # Overwrite the default eps value. See scenario 2 for full explanation.
     with ContextParams(FrozenBatchNorm2d, weights is not None, eps=0.0):
         backbone = _resnet_fpn_backbone('resnet50', weights_backbone, trainable_layers=trainable_backbone_layers)
         model = FasterRCNN(backbone, num_classes=num_classes, **kwargs)
