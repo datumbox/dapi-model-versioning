@@ -72,7 +72,7 @@ class BCBreakingWeights(Weights):
 
 
 @register
-def bc_model(weights: Optional[BCBreakingWeights] = None) -> nn.Module:
+def bc_model(weights: Optional[BCBreakingWeights] = None) -> BCBreaking:
     BCBreakingWeights.check_type(weights)
 
     with ContextParams(BCBreaking, weights is None, init_attr='children'):

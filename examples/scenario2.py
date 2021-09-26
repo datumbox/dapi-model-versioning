@@ -63,7 +63,7 @@ class DummyWeights(Weights):
 
 
 @register
-def dummy(weights: Optional[DummyWeights] = None) -> nn.Module:
+def dummy(weights: Optional[DummyWeights] = None) -> Dummy:
     DummyWeights.check_type(weights)
 
     # Overwrites the default epsilon only when the weights parameter is specified

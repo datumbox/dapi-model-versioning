@@ -81,7 +81,7 @@ class MySOTAWeights(Weights):
 # Here we also show-case an optional registration mechanism that adds the builder and its weight class to the public
 # API of the module.
 @register
-def mysota(weights: Optional[MySOTAWeights] = None, progress: bool = True, **kwargs: Any) -> nn.Module:
+def mysota(weights: Optional[MySOTAWeights] = None, progress: bool = True, **kwargs: Any) -> MySOTA:
     # Confirm we got the right weights
     MySOTAWeights.check_type(weights)
 
@@ -110,7 +110,7 @@ class MySOTAV2Weights(Weights):
 # assessed on a case-by-case basis. See https://github.com/pytorch/vision/pull/1224 and
 # https://github.com/pytorch/pytorch/blob/294db060/torch/nn/quantized/dynamic/modules/linear.py#L44-L49
 @register
-def mysota_v2(weights: Optional[MySOTAV2Weights] = None, progress: bool = True, **kwargs: Any) -> nn.Module:
+def mysota_v2(weights: Optional[MySOTAV2Weights] = None, progress: bool = True, **kwargs: Any) -> MySOTA:
     # Confirm we got the right weights
     MySOTAV2Weights.check_type(weights)
 

@@ -90,7 +90,7 @@ the real-world models included in the Domain libraries. Here is its structure:
 - The real-world demos are placed in the `*.py` files located at the root of the repo. They target to show how the API 
   looks from the user perspective:
     - The `image_classification.py` and `image_detection.py` show-case the new API on Vision.
-    - The `test_encoding.py` gives us an example on how Text could structure its models. Note that because TorchText
+    - The `text_encoding.py` gives us an example on how Text could structure its models. Note that because TorchText
     currently doesn't provide pre-trained models on the public repo, we use huggingface's Roberta.
     - The `text_to_speech.py` provides an example of implementing the new API on Audio.
 - Other details:
@@ -138,16 +138,16 @@ High-level API implementation in pseudocode:
 @dataclass
 class ResNet50Weights(Enum):
     ImageNet1K_RefV1 = (
-        url="https://path/to/weights.pth",  # Weight URL/path
+        url="https://path/to/weights.pth",  # Weights URL/path
         transforms=partial(ImageNetPreprocessing, width=224),  # Preprocessing transform constructor
-        meta={"num_classes": 1000, "Acc@1": 76.130, "classes": []}  # Arbitrary Meta-Data
+        meta={"num_classes": 1000, "Acc@1": 76.130, "classes": [...]}  # Arbitrary Meta-Data
         # Other customizable fields go here
     )
     CIFAR100_RefV1 = (
-        # Weight data go here
+        # Weights data go here
     )
 
-def resnet50(weights=ResNet50Weights.ImageNet1K_RefV1) -> ResNet:
+def resnet50(weights: Optional[ResNet50Weights] = None) -> ResNet:
     # Model construction and load weighting goes here
     pass
 
@@ -156,13 +156,13 @@ def resnet50(weights=ResNet50Weights.ImageNet1K_RefV1) -> ResNet:
 class ResNet50V2Weights(Enum):
     pass
 
-def resnet50_v2(weights=ResNet50V2Weights.ImageNet1K_RefV1) -> ResNetV2:
+def resnet50_v2(weights: Optional[ResNet50V2Weights] = None) -> ResNetV2:  # Assume new Class needed
     pass
 ```
 
 Example of using the API:
 ```python
-# Model initialization and weight loading
+# Model initialization and weights loading
 weights = ResNet50Weights.ImageNet1K_RefV1
 model = resnet50(weights=weights).eval()
 
@@ -180,12 +180,12 @@ class_name = weights.meta['classes'][label]
 
 The above approach:
 - Can be implemented in a fully BC manner and it's easy to adopt across all domain libraries.
-- Covers all mandatory criteria listed above.
+- Covers all mandatory criteria.
 - Supports all the nice-to-haves.
 
 ### Demos
 
-To prove that the proposed API can accommodate all domains, we implemented it to 4 real-world models. To run the demos
+To prove that the proposed API can accommodate all domains, we implemented it to 4 real-world models. To see the demos
 run the following commands from the root for the repo:
 
 #### Image Classification: ResNet50
@@ -232,10 +232,9 @@ Saving wave at ./output/message.wav
 
 ### Implementation details
 
-Below we link directly to the actual implementations and code examples where we document everything extensively.
-
-The best way to see how the proposal works is to check the `examples` folder, where we focus on 3 Model Versioning
-scenarios that we had to address in the past:
+Below we link directly to the actual implementations and code examples where we document everything extensively. The 
+best way to see how the proposal works is to check the `examples` folder, where we focus on 3 Model Versioning scenarios
+that we had to address in the past:
 1. [Multi-weight and Multi-version support (BC)](https://github.com/datumbox/dapi-model-versioning/blob/main/examples/scenario1.py)
 2. [Updated default Hyper-params (BC-breaking)](https://github.com/datumbox/dapi-model-versioning/blob/main/examples/scenario2.py)
 3. [Code change which affects the model behaviour but architecture remains the same (BC-breaking)](https://github.com/datumbox/dapi-model-versioning/blob/main/examples/scenario3.py)
@@ -260,10 +259,19 @@ Here we briefly list the alternatives that we considered along with some of the 
 in all cases, we prefer using Enums to strings. To read more on why check this 
 [section](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L43-L45).
 
-#### Alt 1: Single model builder and weight parameter for all code versions
+#### Single model builder and weights parameter for all code versions
 
 ```python
-def resnet50(weights=ResNet50Weights.V2_ImageNet1K_RefV1) -> nn.Module:
+@dataclass
+class ResNet50Weights(Enum):
+    V1_NoWeights = (
+        # Weights data go here
+    )
+    V1_ImageNet1K_RefV1 = (
+        # Weights data go here
+    )
+
+def resnet50(weights: ResNet50Weights = ResNet50Weights.V1_NoWeights) -> nn.Module:
     pass
 ```
 
@@ -273,13 +281,19 @@ Pros:
 Cons:
 - All versions must be handled in a single method leading to complex implementations.
 - Harder to document and unit-test using standard python tools.
-- Since the version is linked to the weight enum, it would require the introduction of special enums such as 
-  `ResNet50Weights.V2_NONE` to denote that no pre-trained weights should be loaded.
+- Since the version is linked to the weights enum, it would require the introduction of special enums to denote that no 
+  pre-trained weights should be loaded.
 
-#### Alt 2: Single model builder, two separate arguments for the version and weights
+#### Single model builder, two separate arguments for the version and weights
 
 ```python
-def resnet50(version=2, weights=ResNet50Weights.ImageNet1K_RefV1) -> nn.Module:
+@dataclass
+class ResNet50Weights(Enum):
+    ImageNet1K_RefV1 = (
+        # Weights data go here
+    )
+
+def resnet50(version: int = 1, weights: Optional[ResNet50Weights] = None) -> nn.Module:
     pass
 ```
 
@@ -291,10 +305,10 @@ Cons:
 - Harder to document and unit-test using standard python tools.
 - Difficult for the users to tell which `version` is compatible with which `weights` enum.
 
-#### Alt 3: Separate model builder for each code version and weights combination
+#### Separate model builder for each code version and weights combination
 
 ```python
-def resnet50_v2_imagenet_ref1(pretrained=True) -> ResNetV2:
+def resnet50_v2_imagenet_ref1(pretrained: bool = False) -> ResNetV2:
     pass
 ```
 
@@ -316,7 +330,7 @@ utilities adopted can live in multiple domain repos and can move on a common rep
 
 ## Next steps
 
-- [ ] Share the Repo with the leads of TorchAudio and TorchText and adapt it based on their feedback. 
+- [ ] Request input from TorchAudio and TorchText leads and adapt the proposal based on their feedback. 
 - [ ] Present the proposal to the broad DAPI maintainers and make amendments based on their input. 
-- [ ] Make the Repo public, collect feedback from the community and iterate on the proposal.
+- [ ] Collect feedback from the community and iterate on the proposal.
 - [ ] Implement the proposal on domain libraries.
