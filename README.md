@@ -5,14 +5,15 @@
     2. [Objective](#objective)
     3. [Motivation](#motivation)
 2. [Previous work](#previous-work)
-3. [Repository Structure](#repository-structure)
+3. [Repository structure](#repository-structure)
 4. [Design](#design)
     1. [Specifications](#specifications)
     2. [Out of scope](#out-of-scope)
     3. [Proposal](#proposal)
     4. [Demos](#demos)
-    5. [Implementation Details](#implementation-details)
+    5. [Implementation details](#implementation-details)
     6. [Alternatives considered](#alternatives-considered)
+    7. [Release plan](#release-plan)
 5. [Next steps](#next-steps)
 
 ## Introduction
@@ -65,12 +66,14 @@ handled with a mix of version parameters, deprecation warnings and method renami
 [14](https://github.com/pytorch/pytorch/blob/c371542e/caffe2/python/cnn.py#L182-L183),
 [15](https://github.com/pytorch/pytorch/blob/c371542efc31b1abfe6f388042aa3ab0cef935f2/caffe2/python/brew.py#L65-L66)]
 
-## Repository Structure
+## Repository structure
 
-This RFC comes with a companion [repository](https://github.com/datumbox/dapi-model-versioning). It aims to serve as a 
-live RFC document capable of show-casing the proposed API and utilities, providing examples of how to address the most 
-common model-versioning scenarios and offering actual implementations for some of the real-world models included in the 
-Domain libraries. Here is its structure:
+This RFC comes with a companion [repository](https://github.com/datumbox/dapi-model-versioning). Amendments to this 
+RFC should be made by sending a Pull Request to the repo.
+
+The repository aims to serve as a live RFC document capable of show-casing the proposed API and utilities, providing 
+examples of how to address the most common model-versioning scenarios and offering actual implementations for some of 
+the real-world models included in the Domain libraries. Here is its structure:
 
 - The `README.md` file serves as the main RFC document.
 - The `examples` folder contains standalone implementations for the most common model versioning scenarios that we've 
@@ -144,7 +147,7 @@ class ResNet50Weights(Enum):
         # Weight data go here
     )
 
-def resnet50(weights=ResNet50Weights.ImageNet1K_RefV1) -> nn.Module:
+def resnet50(weights=ResNet50Weights.ImageNet1K_RefV1) -> ResNet:
     # Model construction and load weighting goes here
     pass
 
@@ -153,7 +156,7 @@ def resnet50(weights=ResNet50Weights.ImageNet1K_RefV1) -> nn.Module:
 class ResNet50V2Weights(Enum):
     pass
 
-def resnet50_v2(weights=ResNet50V2Weights.ImageNet1K_RefV1) -> nn.Module:
+def resnet50_v2(weights=ResNet50V2Weights.ImageNet1K_RefV1) -> ResNetV2:
     pass
 ```
 
@@ -227,7 +230,7 @@ $ python -u text_to_speech.py
 Saving wave at ./output/message.wav
 ```
 
-### Implementation Details
+### Implementation details
 
 Below we link directly to the actual implementations and code examples where we document everything extensively.
 
@@ -260,7 +263,7 @@ in all cases, we prefer using Enums to strings. To read more on why check this
 #### Alt 1: Single model builder and weight parameter for all code versions
 
 ```python
-def resnet50(weights=ResNet50Weights.V2_ImageNet1K_RefV1):
+def resnet50(weights=ResNet50Weights.V2_ImageNet1K_RefV1) -> nn.Module:
     pass
 ```
 
@@ -276,7 +279,7 @@ Cons:
 #### Alt 2: Single model builder, two separate arguments for the version and weights
 
 ```python
-def resnet50(version=2, weights=ResNet50Weights.ImageNet1K_RefV1):
+def resnet50(version=2, weights=ResNet50Weights.ImageNet1K_RefV1) -> nn.Module:
     pass
 ```
 
@@ -288,11 +291,10 @@ Cons:
 - Harder to document and unit-test using standard python tools.
 - Difficult for the users to tell which `version` is compatible with which `weights` enum.
 
-
 #### Alt 3: Separate model builder for each code version and weights combination
 
 ```python
-def resnet50_v2_imagenet_ref1(pretrained=True):
+def resnet50_v2_imagenet_ref1(pretrained=True) -> ResNetV2:
     pass
 ```
 
@@ -304,6 +306,13 @@ Cons:
 - The number of methods increases multiplicatively with each version, dataset and recipe combination.
 - Can lead to a lot of legacy code.
 - It's a nonsolution. It does not really addresses the Versioning problem.
+
+### Release plan
+
+The key components of the proposal should be independently adapted and implemented by the maintainers of each domain 
+library. The degree to which the optional components will be adopted can vary and depends on the needs of each domain.
+Since we currently don't have an agreed way to handle interdependencies between domain libraries, any of the proposed 
+utilities adopted can live in multiple domain repos and can move on a common repo if such is introduced on the future.
 
 ## Next steps
 
