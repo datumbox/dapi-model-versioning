@@ -20,7 +20,7 @@ model.eval()
 # Initialize inference transforms
 preprocess = weights.transforms()
 
-# Apply inference presets
+# Apply inference preprocessing transforms
 sequences, lengths = preprocess(text)
 
 # Infer spectogram

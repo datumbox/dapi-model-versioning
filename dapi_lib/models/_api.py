@@ -1,7 +1,7 @@
+import contextlib
 import sys
 import warnings
 
-import contextlib
 from dataclasses import dataclass
 from enum import Enum
 from inspect import signature
@@ -24,7 +24,7 @@ class Weights(Enum):
     the right model building method. Moreover the use of data classes allows us to associate easier each weight to its
     linked attributes.
 
-    The current implementation is an illusration of how one can use the Weights class. Adding, removing and adapting
+    The current implementation is an illustration of how one can use the Weights class. Adding, removing and adapting
     the attributes to meet the needs of each library is essential. This example implementation suggests using the
     following attributes:
         url (str): The location where we find the weights. Can be adapted to facilitate integration with manifold.
@@ -32,7 +32,7 @@ class Weights(Enum):
             needed to use the model. The reason we attach a constructor method rather than an already constructed
             object is because the specific object might have memory (for example a tokenizer) and thus we want to delay
             initialization until needed.
-        meta (dict): Stores meta-data related to the weights of the model and its configuration. These can be simply
+        meta (Dict[str, Any]): Stores meta-data related to the weights of the model and its configuration. These can be
             informative attributes (for example the number of parameters/flops, recipe link/methods used in training
             etc), configuration parameters (for example the `num_classes` or `n_symbol`) needed to construct the model
             or important meta-data (for example the `classes` of a classification model) needed to use the model.
@@ -87,7 +87,7 @@ class ContextParams(contextlib.ContextDecorator):
         target_class (type): the class for which we want to modify its behaviour.
         active (bool): a flag that indicates whether the context manager should be active. This is useful for turning
             on/off the context manager depending on a condition.
-        params (dict): the named parameters that we want to pass to the target class.
+        **params: the named parameters and the values that we want to pass to the target class.
     """
 
     _QUEUE_NAME = "_queued_params"
@@ -150,12 +150,12 @@ def get(name: str, weights: Optional[Weights] = _LatestWeights.LATEST) -> Tuple[
     weights. Users who prefer stability should always specify the second parameter.
 
     Args:
-        name (str): the name of the previously registred model builder method.
-        weights (Weights, optional): the weights that we should use to initialize the model. If not defined then the
+        name (str): the name of the previously registered model builder method.
+        weights (Optional[Weights]): the weights that we should use to initialize the model. If not defined then the
             first available Weight marked as latest will be selected. Passing `None` will cause no weights to be loaded.
 
     Returns:
-        Tuple[Callable, Weights]: The model along with the weights enum used to initialize it.
+        Tuple[Callable, Optional[Weights]]: The model along with the weights enum used to initialize it.
     """
     method, latest_weight = _MODEL_METHODS[name]
     if weights == _LatestWeights.LATEST:
@@ -169,7 +169,7 @@ def list() -> List[str]:
     Lists all the registered model building methods.
 
     Returns:
-        List: The list of registered model builders.
+        List[str]: The list of registered model builders.
     """
     return sorted(_MODEL_METHODS.keys())
 
@@ -177,14 +177,14 @@ def list() -> List[str]:
 def register(fn):
     """
     Adds the provided model building method along with its weights class to the public API. The method registers
-    not only the function but also its latest weight (the first one if many).
+    not only the function but also its latest weight (the first one if multiple).
 
     Args:
         fn (function): the model builder method that we want to register to the model API. It is assumed to have
             a `weights` parameter where the user can optionally pass its weights.
 
     Returns:
-        function: The registred function.
+        function: The registered function.
     """
     module = sys.modules[fn.__module__]
     if not hasattr(module, '__all__'):
@@ -197,7 +197,7 @@ def register(fn):
 
     sig = signature(fn)
     if 'weights' not in sig.parameters:
-        raise Exception("The method is missing the mandatory 'weights' argument.")
+        raise Exception("The method is missing the 'weights' argument.")
 
     ann = signature(fn).parameters['weights'].annotation
     if isinstance(ann, type) and issubclass(ann, Weights):

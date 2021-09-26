@@ -8,7 +8,7 @@ from torchvision import transforms as T
 from torchvision.transforms import functional as F
 
 
-# Allows to handle both PIL and Tensor images
+# Allows handling of both PIL and Tensor images
 class ConvertImageDtype(nn.Module):
 
     def __init__(self, dtype: torch.dtype) -> None:

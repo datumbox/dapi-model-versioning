@@ -3,7 +3,7 @@ Scenario:
     2. Updated default Hyper-params (BC-breaking)
 
 Description:
-    The default hyper-param of a class/method/layer needs to be changed (BC-breaking) because it causes issues to the
+    The default hyper-param of a class/model/layer needs to be changed (BC-breaking) because it causes issues to the
     users. All other code remains the same. New models need to be constructed with the updated value, old pre-trained
     models must continue using the original value.
 
@@ -38,7 +38,7 @@ __all__ = ['Dummy']
 class MyFrozenBN(FrozenBatchNorm2d):
 
     def __init__(self, num_features: int, eps: float = 1e-5):
-        # Below the ContextParams.get() is used to overwrite the default value of the class under specific conditions.
+        # The ContextParams.get() is used to overwrite the default value of the constructor under specific conditions.
         super().__init__(num_features, eps=ContextParams.get(self, 'eps', eps))
 
 

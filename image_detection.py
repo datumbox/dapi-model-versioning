@@ -18,7 +18,7 @@ model.eval()
 # Initialize inference transforms
 preprocess = weights.transforms()
 
-# Apply inference presets
+# Apply inference preprocessing transforms
 image = preprocess(img)
 
 # Make predictions

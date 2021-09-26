@@ -1,4 +1,4 @@
-# This contains mock objects and is going to be replaced with a mechanism provided by
+# This contains mock objects and are going to be replaced with a mechanism provided by
 # https://github.com/pmeier/torchvision-datasets-rework/
 import os
 

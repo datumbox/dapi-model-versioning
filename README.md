@@ -6,11 +6,11 @@
 
 The PyTorch domain libraries don't have a standard way to perform Model Versioning. With the term "Model Versioning" we 
 denote the problem of maintaining concurrently multiple versions of pre-trained weights and handling changes on the 
-model code both in a Bacwards Compatible (BC) and BC-breaking manner.
+model code both in a Backwards Compatible (BC) and BC-breaking manner.
 
 ### Objective
 
-Establish a common approach for hanling Model Versioning across all domain libraries. 
+Establish a common approach for handling Model Versioning across all domain libraries. 
 
 ### Motivation
 
@@ -36,7 +36,7 @@ for reproducibility etc. Standardizing the way we do this across domains is impo
 This is not the first time the model versioning problem arises [[7](https://github.com/pytorch/vision/issues/2955)] 
 as it has previously been discussed by the domain library maintainers. 
 
-In TorchVision, model versioning related issues have been handled in a case-by-case basis 
+In TorchVision, model versioning related issues have been handled on a case-by-case basis 
 [[8](https://github.com/pytorch/vision/issues/2599), [9](https://github.com/pytorch/vision/issues/2326), 
 [10](https://github.com/pytorch/vision/pull/3205), [11](https://github.com/pytorch/vision/pull/1224)]. We typically
 try to maintain BC as much as possible except in cases where the issue is considered a bug or extremely detrimental to
@@ -82,7 +82,7 @@ The proposed solution can optionally support the following nice-to-haves:
 
 ### Detailed design
 
-#### Proposed: Separate model builder and weight parameter for each model version
+#### Proposal: Separate model builder and weight parameter for each model version
 
 We propose maintaining the existing model builder methods that all Domain libraries support to construct models and 
 use Enum data classes to pass information about the pre-trained weights. Each model variant will have its own method
@@ -141,7 +141,7 @@ The above approach:
 
 #### Demos
 
-To prove that the proposed API can accomodate all domains, we implemented it to 4 real-world models. To run the demos
+To prove that the proposed API can accommodate all domains, we implemented it to 4 real-world models. To run the demos
 run the following commands from the root for the repo:
 
 ##### Image Classification: ResNet50
@@ -232,7 +232,7 @@ Cons:
 - Since the version is linked to the weight enum, it would require the introduction of special enums to denote that no
   pre-trained weights should be loaded.
 
-#### Alt 2: Single model builder, two different arguments to denote the version and the weights
+#### Alt 2: Single model builder, two separate arguments for the version and weights
 
 ```python
 def resnet50(version=2, weights=ResNet50Weights.ImageNet1K_RefV1):
@@ -241,7 +241,6 @@ def resnet50(version=2, weights=ResNet50Weights.ImageNet1K_RefV1):
 
 Pros:
 - Small number of model builders and Enum classes to maintain.
-- No longer requires special enums.
 
 Cons:
 - All versions must be handled in a single method leading to complex implementations.
@@ -282,7 +281,7 @@ Below we describe the structure of the [repository](https://github.com/datumbox/
     - Extensive importing from the Domain libraries and inheritance is used to minimize the copy-pasting of code from
     the domain libs. The intention is to upstream the proposed changes after the RFC concludes.
 - The real-world demos are placed in the `*.py` files located at the root of the repo. They target to show how the API 
-  looks from the user purspective:
+  looks from the user perspective:
     - The `image_classification.py` and `image_detection.py` show-case the new API on Vision.
     - The `test_encoding.py` gives us an example on how Text could structure its models. Note that because TorchText
     currently doesn't provide pre-trained models on the public repo, we use huggingface's Roberta.

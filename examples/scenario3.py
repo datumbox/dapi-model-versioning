@@ -21,7 +21,7 @@ Example:
     behaviour of the Class.
 
     Here we present an alternative approach that allows us to roll back to the previous behaviour by using Context
-    Managers without introducing additional parameters to the Class.
+    Managers without introducing additional parameters to the constructor.
 """
 from torch import nn, Tensor
 from typing import Optional
