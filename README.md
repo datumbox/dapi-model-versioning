@@ -1,5 +1,20 @@
 # DAPI Model Versioning RFC
 
+1. [Introduction](#introduction)
+    1. [Problem definition](#problem-definition)
+    2. [Objective](#objective)
+    3. [Motivation](#motivation)
+2. [Previous work](#previous-work)
+3. [Repository Structure](#repository-structure)
+4. [Design](#design)
+    1. [Specifications](#specifications)
+    2. [Out of scope](#out-of-scope)
+    3. [Proposal](#proposal)
+    4. [Demos](#demos)
+    5. [Implementation Details](#implementation-details)
+    6. [Alternatives considered](#alternatives-considered)
+5. [Next steps](#next-steps)
+
 ## Introduction
 
 ### Problem definition
@@ -50,11 +65,38 @@ handled with a mix of version parameters, deprecation warnings and method renami
 [14](https://github.com/pytorch/pytorch/blob/c371542e/caffe2/python/cnn.py#L182-L183),
 [15](https://github.com/pytorch/pytorch/blob/c371542efc31b1abfe6f388042aa3ab0cef935f2/caffe2/python/brew.py#L65-L66)]
 
-## Proposal
+## Repository Structure
 
-This repository aims to serve as a live RFC document capable of show-casing the proposed API and utilities, providing 
-examples of how to address the most common model-versioning scenarios and offering actual implementations for some of 
-the real-world models included in the Domain libraries.
+This RFC comes with a companion [repository](https://github.com/datumbox/dapi-model-versioning). It aims to serve as a 
+live RFC document capable of show-casing the proposed API and utilities, providing examples of how to address the most 
+common model-versioning scenarios and offering actual implementations for some of the real-world models included in the 
+Domain libraries. Here is its structure:
+
+- The `README.md` file serves as the main RFC document.
+- The `examples` folder contains standalone implementations for the most common model versioning scenarios that we've 
+  faced before. On the top of each scenario file we include a description and an example with references to a real-world
+  case. We recommend starting from there.
+- The actual implementation of the proposal lives in the `dapi_lib` package:
+    - The `dapi_lib/models/_api.py` contains the majority of the utilities used by the API.
+    - The rest of the files in `dapi_lib/models/*.py` are implementations of real-world models from different domains.
+    - The `dapi_lib/datasets` and `dapi_lib/transforms` packages contain code taken from the domain libs and adapted
+    for the needs of this RFC. These are purely there to make the demos run smoothly and they should not be considered
+    part of this proposal.
+    - Extensive importing from the Domain libraries and inheritance is used to minimize the copy-pasting of code from
+    the domain libs. The intention is to upstream the proposed changes after the RFC concludes.
+- The real-world demos are placed in the `*.py` files located at the root of the repo. They target to show how the API 
+  looks from the user perspective:
+    - The `image_classification.py` and `image_detection.py` show-case the new API on Vision.
+    - The `test_encoding.py` gives us an example on how Text could structure its models. Note that because TorchText
+    currently doesn't provide pre-trained models on the public repo, we use huggingface's Roberta.
+    - The `text_to_speech.py` provides an example of implementing the new API on Audio.
+- Other details:
+    - The `assets` folder contains a couple of assets necessary for the demos.
+    - An `output` folder will be created on the root of the project after running the demos.
+    - The `third_party` package contains copy-pasted code necessary for the demos and it is not part of this RFC.
+    - The `requirements.txt` file contains a list of all dependencies for running the code on this repo.
+
+## Design
 
 ### Specifications
 
@@ -80,15 +122,14 @@ The proposed solution can optionally support the following nice-to-haves:
    [construct models](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/resnet.py#L19-L43),
    these are not part of the proposal and libraries can adapt them to their needs and current practices.
 
-### Detailed design
+### Proposal
 
-#### Proposal: Separate model builder and weight parameter for each model version
+We propose using separate model builders and a weights parameter for each model version. We plan to maintain the 
+existing model builder methods supported by all Domain libraries to construct models and use Enum data classes to pass 
+the information of the pre-trained weights. Each model variant will have its own method and weights. When BC-breaking 
+changes are necessary, we will introduce new builder methods to keep things BC. 
 
-We propose maintaining the existing model builder methods that all Domain libraries support to construct models and 
-use Enum data classes to pass information about the pre-trained weights. Each model variant will have its own method
-and weights. When BC-breaking changes are introduced we will introduce new methods. 
-
-High-level API pseudocode:
+High-level API implementation in pseudocode:
 
 ```python
 @dataclass
@@ -116,7 +157,7 @@ def resnet50_v2(weights=ResNet50V2Weights.ImageNet1K_RefV1) -> nn.Module:
     pass
 ```
 
-Usage example:
+Example of using the API:
 ```python
 # Model initialization and weight loading
 weights = ResNet50Weights.ImageNet1K_RefV1
@@ -139,12 +180,12 @@ The above approach:
 - Covers all mandatory criteria listed above.
 - Supports all the nice-to-haves.
 
-#### Demos
+### Demos
 
 To prove that the proposed API can accommodate all domains, we implemented it to 4 real-world models. To run the demos
 run the following commands from the root for the repo:
 
-##### Image Classification: ResNet50
+#### Image Classification: ResNet50
 
 Check the [model implementation](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/resnet.py) 
 and the [model usage](https://github.com/datumbox/dapi-model-versioning/blob/main/image_classification.py).
@@ -154,7 +195,7 @@ $ python -u image_classification.py
 golden retriever 0.9381255507469177
 ```
 
-##### Object Detection: FasterRCNN with ResNet50 FPN
+#### Object Detection: FasterRCNN with ResNet50 FPN
 
 Check the [model implementation](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/faster_rcnn.py) 
 and the [model usage](https://github.com/datumbox/dapi-model-versioning/blob/main/image_detection.py).
@@ -165,7 +206,7 @@ Saving picture at ./output/object-detection.jpg
 ```
 ![object detection](https://i.ibb.co/yPQXxmf/object-detection.jpg)
 
-##### Text Encoding: Roberta Base
+#### Text Encoding: Roberta Base
 
 Check the [model implementation](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/roberta.py) 
 and the [model usage](https://github.com/datumbox/dapi-model-versioning/blob/main/text_encoding.py).
@@ -175,7 +216,7 @@ $ python -u text_encoding.py
 125000000 torch.Size([1, 5, 768])
 ```
 
-##### Text to Speech: Tacotron2 + WaveRNN
+#### Text to Speech: Tacotron2 + WaveRNN
 
 Check the [model implementation](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/tacotron2.py) 
 and the [model usage](https://github.com/datumbox/dapi-model-versioning/blob/main/text_to_speech.py).
@@ -186,7 +227,7 @@ $ python -u text_to_speech.py
 Saving wave at ./output/message.wav
 ```
 
-#### Deep Dive
+### Implementation Details
 
 Below we link directly to the actual implementations and code examples where we document everything extensively.
 
@@ -206,7 +247,7 @@ We also offer two optional components:
 - The [ContextParams](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L74-L132) class
   which allows us to minimize the effects of BC-breaking changes to classes such as Layers and Modules.
 - A [Registration](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L135-L220)
-  mechanism similar to the one adapted for the prototype datasets on 
+  mechanism similar to the one used on the prototype datasets of 
   [TorchVision](https://github.com/pytorch/vision/blob/main/torchvision/prototype/datasets/_api.py) to show-case that
   our proposal is compatible with it.
 
@@ -229,8 +270,8 @@ Pros:
 Cons:
 - All versions must be handled in a single method leading to complex implementations.
 - Harder to document and unit-test using standard python tools.
-- Since the version is linked to the weight enum, it would require the introduction of special enums to denote that no
-  pre-trained weights should be loaded.
+- Since the version is linked to the weight enum, it would require the introduction of special enums such as 
+  `ResNet50Weights.V2_NONE` to denote that no pre-trained weights should be loaded.
 
 #### Alt 2: Single model builder, two separate arguments for the version and weights
 
@@ -263,34 +304,6 @@ Cons:
 - The number of methods increases multiplicatively with each version, dataset and recipe combination.
 - Can lead to a lot of legacy code.
 - It's a nonsolution. It does not really addresses the Versioning problem.
-
-### Repository Structure
-
-Below we describe the structure of the [repository](https://github.com/datumbox/dapi-model-versioning):
-
-- The `README.md` file serves as the main RFC document.
-- The `examples` folder contains standalone implementations for the most common model versioning scenarios that we've 
-  faced before. On the top of each scenario file we include a description and an example with references to a real-world
-  case. We recommend starting from there.
-- The actual implementation of the proposal lives in the `dapi_lib` package:
-    - The `dapi_lib/models/_api.py` contains the majority of the utilities used by the API.
-    - The rest of the files in `dapi_lib/models/*.py` are implementations of real-world models from different domains.
-    - The `dapi_lib/datasets` and `dapi_lib/transforms` packages contain code taken from the domain libs and adapted
-    for the needs of this RFC. These are purely there to make the demos run smoothly and they should not be considered
-    part of this proposal.
-    - Extensive importing from the Domain libraries and inheritance is used to minimize the copy-pasting of code from
-    the domain libs. The intention is to upstream the proposed changes after the RFC concludes.
-- The real-world demos are placed in the `*.py` files located at the root of the repo. They target to show how the API 
-  looks from the user perspective:
-    - The `image_classification.py` and `image_detection.py` show-case the new API on Vision.
-    - The `test_encoding.py` gives us an example on how Text could structure its models. Note that because TorchText
-    currently doesn't provide pre-trained models on the public repo, we use huggingface's Roberta.
-    - The `text_to_speech.py` provides an example of implementing the new API on Audio.
-- Other details:
-    - The `assets` folder contains a couple of assets necessary for the demos.
-    - An `output` folder will be created on the root of the project after running the demos.
-    - The `third_party` package contains copy-pasted code necessary for the demos and it is not part of this RFC.
-    - The `requirements.txt` file contains a list of all dependencies for running the code on this repo.
 
 ## Next steps
 
