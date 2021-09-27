@@ -186,7 +186,7 @@ The above approach:
 ### Demos
 
 To prove that the proposed API can accommodate all domains, we implemented it to 4 real-world models. To see the demos
-run the following commands from the root for the repo:
+run the following commands from the root of the repo:
 
 #### Image Classification: ResNet50
 

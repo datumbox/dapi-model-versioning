@@ -190,10 +190,10 @@ def register(fn):
     if not hasattr(module, '__all__'):
         module.__all__ = []
 
-    model_name = fn.__name__
-    if model_name in _MODEL_METHODS:
-        raise Exception(f"A model is already registered with key '{model_name}'.")
-    module.__all__.append(model_name)
+    method_name = fn.__name__
+    if method_name in _MODEL_METHODS:
+        raise Exception(f"A method is already registered with key '{method_name}'.")
+    module.__all__.append(method_name)
 
     sig = signature(fn)
     if 'weights' not in sig.parameters:
@@ -215,6 +215,6 @@ def register(fn):
         module.__all__.append(weights_class.__name__)
         latest_weight = next(iter(weights_class.get_latest()), None)
 
-    _MODEL_METHODS[model_name] = (fn, latest_weight)
+    _MODEL_METHODS[method_name] = (fn, latest_weight)
 
     return fn
