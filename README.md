@@ -191,11 +191,20 @@ The above approach:
 
 This section provides some guidance on how to handle special cases that were brought up during the review of the RFC. 
 When multiple valid options exist, the DAPI libs should choose the one that meets their needs best:
-- If a model requires both pre-processing and post-processing transforms, there are two main options:
+- If a model requires both pre-processing and post-processing transforms, there are two main options (for more details 
+  see [issue #5](https://github.com/datumbox/dapi-model-versioning/issues/5)):
     1. We can add both of them in a single transformer class, which will expose 2 public methods one for `preprocessing` 
        and one for `postprocessing`.
-    2. We can provide two separate transformer classes which will implement `preprocessing` and `postprocessing` on their
-       `forward()`/`__call()__` method. Then we will offer two separate fields for them on the `Enum` class.
+    2. We can provide two separate transformer classes which will implement `preprocessing` and `postprocessing` on 
+       their `forward()`/`__call()__` method. Then we will offer two separate fields for them on the `Enum` class.
+- Models often use other models as backbones (for more details 
+  see [issue #6](https://github.com/datumbox/dapi-model-versioning/issues/6)). This paradigm is common on Audio, Text
+  and Vision and usually encoder architectures are combined with extra Heads to solve new tasks. In this RFC, we propose 
+  to use model builders to define combinations of encoders and extra heads and we provide a demo of 
+  [how to implement it](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/faster_rcnn.py#L77-L80). 
+  Supporting arbitrary combinations of encoders and task heads is also possible by passing the `backbone` to the 
+  [composite Model classes](https://github.com/datumbox/dapi-model-versioning/issues/6#issuecomment-932251484) but this
+  topic is beyond the scope of this RFC.
 
 ### Demos
 
