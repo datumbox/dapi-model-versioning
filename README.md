@@ -10,6 +10,7 @@
     1. [Specifications](#specifications)
     2. [Out of scope](#out-of-scope)
     3. [Proposal](#proposal)
+    3. [Special cases](#special-cases)
     4. [Demos](#demos)
     5. [Implementation details](#implementation-details)
     6. [Alternatives considered](#alternatives-considered)
@@ -124,6 +125,9 @@ The proposed solution can optionally support the following nice-to-haves:
 2. We focus on the public API and not on implementation details. Though the repo contains private helper methods used to
    [construct models](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/resnet.py#L19-L43),
    these are not part of the proposal and libraries can adapt them to their needs and current practices.
+3. We try to keep this RFC not too opinionated but rather describe a framework that gives to the DAPI libs the space to
+   adapt the solution on their needs. As a result, fully specifying implementation details is beyond the scope of this
+   proposal.
 
 ### Proposal
 
@@ -182,6 +186,16 @@ The above approach:
 - Can be implemented in a fully BC manner and it's easy to adopt across all domain libraries.
 - Covers all mandatory criteria.
 - Supports all the nice-to-haves.
+
+### Special cases
+
+This section provides some guidance on how to handle special cases that were brought up during the review of the RFC. 
+When multiple valid options exist, the DAPI libs should choose the one that meets their needs best:
+- If a model requires both pre-processing and post-processing transforms, there are two main options:
+    1. We can add both of them in a single transformer class, which will expose 2 public methods one for `preprocessing` 
+       and one for `postprocessing`.
+    2. We can provide two separate transformer classes which will implement `preprocessing` and `postprocessing` on their
+       `forward()`/`__call()__` method. Then we will offer two separate fields for them on the `Enum` class.
 
 ### Demos
 
