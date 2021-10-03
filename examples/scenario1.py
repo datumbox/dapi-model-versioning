@@ -24,7 +24,7 @@ from functools import partial
 from torch import nn, Tensor
 from typing import Any, Optional
 
-from dapi_lib.models._api import register, Weights
+from dapi_lib.models._api import register, Weights, WeightEntry
 from dapi_lib.transforms.vision_presets import ConvertImageDtype
 
 
@@ -55,19 +55,19 @@ class MySOTA(nn.Module):
 # Each model weights class inherits from the Weight class and must provide all mandatory fields. These fields can be
 # easily adapted to the needs of the project.
 class MySOTAWeights(Weights):
-    NOTHOTDOG = (
+    NOTHOTDOG = WeightEntry(
         'https://fake/models/not-hot-dog_weights.pth',  # Weight URL
         partial(ConvertImageDtype, dtype=torch.float16),  # Constructor for preprocessing transforms
         {'size': (32, 32), 'classes': ['not hotdog', 'hotdog']},  # Arbitrary Meta-Data associated with the weights
         True  # Flag that indicates whether it's the latest available weights for the specific Dataset/Taxonomy combo.
     )
-    CATDOG_v1 = (
+    CATDOG_v1 = WeightEntry(
         'https://fake/models/catdog_weights_v1.pth',
         partial(ConvertImageDtype, dtype=torch.float32),
         {'size': (32, 32), 'classes': ['cat', 'dog']},
         False
     )
-    CATDOG_v2 = (
+    CATDOG_v2 = WeightEntry(
         'https://fake/models/catdog_weights_v2.pth',
         partial(ConvertImageDtype, dtype=torch.float16),
         {'size': (64, 64), 'classes': ['cat', 'dog']},
@@ -97,7 +97,7 @@ def mysota(weights: Optional[MySOTAWeights] = None, progress: bool = True, **kwa
 
 
 class MySOTAV2Weights(Weights):
-    NOTHOTDOG = (
+    NOTHOTDOG = WeightEntry(
         'https://fake/models/not-hot-dog_weights_v2.pth',
         partial(ConvertImageDtype, dtype=torch.float16),
         {'size': (32, 32), 'classes': ['not hotdog', 'hotdog']},

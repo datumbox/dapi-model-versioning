@@ -132,33 +132,35 @@ The proposed solution can optionally support the following nice-to-haves:
 ### Proposal
 
 We propose using separate model builders and a weights parameter for each model version. We plan to maintain the 
-existing model builder methods supported by all Domain libraries to construct models and use Enum data classes to pass 
-the information of the pre-trained weights. Each model variant will have its own method and weights. When BC-breaking 
-changes are necessary, we will introduce new builder methods to keep things BC. 
+existing model builder methods supported by all Domain libraries to construct models and use Enums with data class 
+values to pass the information of the pre-trained weights. Each model variant will have its own method and weights. When 
+BC-breaking changes are necessary, we will introduce new builder methods to keep things BC. 
 
 High-level API implementation in pseudocode:
 
 ```python
 @dataclass
+class WeightEntry:
+    url: str  # Weights URL/path
+    transforms: Callable  # Preprocessing transform constructor
+    meta: Dict[str, Any]  # Arbitrary Meta-Data
+    # Other customizable fields go here
+
 class ResNet50Weights(Enum):
-    ImageNet1K_RefV1 = (
-        url="https://path/to/weights.pth",  # Weights URL/path
-        transforms=partial(ImageNetPreprocessing, width=224),  # Preprocessing transform constructor
-        meta={"num_classes": 1000, "Acc@1": 76.130, "classes": [...]}  # Arbitrary Meta-Data
-        # Other customizable fields go here
+    ImageNet1K_RefV1 = WeightEntry(
+        url="https://path/to/weights.pth",
+        transforms=partial(ImageNetPreprocessing, width=224),
+        meta={"num_classes": 1000, "Acc@1": 76.130, "classes": [...]}
     )
-    CIFAR100_RefV1 = (
-        # Weights data go here
-    )
+    CIFAR100_RefV1 = WeightEntry(...)
 
 def resnet50(weights: Optional[ResNet50Weights] = None) -> ResNet:
     # Model construction and load weighting goes here
     pass
 
 # When BC-breaking changes are unavoidable, we will provide new builder methods to keep things BC.
-@dataclass
 class ResNet50V2Weights(Enum):
-    pass
+    ImageNet1K_RefV1 = WeightEntry(...)
 
 def resnet50_v2(weights: Optional[ResNet50V2Weights] = None) -> ResNetV2:  # Assume new Class needed
     pass
@@ -196,7 +198,8 @@ When multiple valid options exist, the DAPI libs should choose the one that meet
     1. We can add both of them in a single transformer class, which will expose 2 public methods one for `preprocessing` 
        and one for `postprocessing`.
     2. We can provide two separate transformer classes which will implement `preprocessing` and `postprocessing` on 
-       their `forward()`/`__call()__` method. Then we will offer two separate fields for them on the `Enum` class.
+       their `forward()`/`__call()__` method. Then we will offer two separate fields for them on the `WeightEntry` 
+       class.
 - Models often use other models as backbones (for more details 
   see [issue #6](https://github.com/datumbox/dapi-model-versioning/issues/6)). This paradigm is common on Audio, Text
   and Vision and usually encoder architectures are combined with extra Heads to solve new tasks. In this RFC, we propose 
@@ -263,15 +266,16 @@ that we had to address in the past:
 3. [Code change which affects the model behaviour but architecture remains the same (BC-breaking)](https://github.com/datumbox/dapi-model-versioning/blob/main/examples/scenario3.py)
 
 Our proposal consists of the following key components:
-- The [Weights](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L17-L71) data class
-  which stores crucial information about the pre-trained weights.
+- The [Weights](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L47-L87) Enum and
+  the [WeightEntry](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L17-L44) data
+  class which store crucial information about the pre-trained weights.
 - The [model builder methods](https://github.com/datumbox/dapi-model-versioning/blob/main/examples/scenario1.py#L78-L96)
   which construct the model variants and load the pre-trained weights.
 
 We also offer two optional components:
-- The [ContextParams](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L74-L132) class
-  which allows us to minimize the effects of BC-breaking changes to classes such as Layers and Modules.
-- A [Registration](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L135-L220)
+- The [ContextParams](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L90-L148) 
+  class which allows us to minimize the effects of BC-breaking changes to classes such as Layers and Modules.
+- A [Registration](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L151-L236)
   mechanism similar to the one used on the prototype datasets of 
   [TorchVision](https://github.com/pytorch/vision/blob/main/torchvision/prototype/datasets/_api.py) to show-case that
   our proposal is compatible with it.
@@ -280,19 +284,14 @@ We also offer two optional components:
 
 Here we briefly list the alternatives that we considered along with some of the reasons we didn't select them. Note that
 in all cases, we prefer using Enums to strings. To read more on why check this 
-[section](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L43-L45).
+[section](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L54-L56).
 
 #### Single model builder and weights parameter for all code versions
 
 ```python
-@dataclass
 class ResNet50Weights(Enum):
-    V1_NoWeights = (
-        # Weights data go here
-    )
-    V1_ImageNet1K_RefV1 = (
-        # Weights data go here
-    )
+    V1_NoWeights = WeightEntry(...)
+    V1_ImageNet1K_RefV1 = WeightEntry(...)
 
 def resnet50(weights: ResNet50Weights = ResNet50Weights.V1_NoWeights) -> nn.Module:
     pass
@@ -310,11 +309,8 @@ Cons:
 #### Single model builder, two separate arguments for the version and weights
 
 ```python
-@dataclass
 class ResNet50Weights(Enum):
-    ImageNet1K_RefV1 = (
-        # Weights data go here
-    )
+    ImageNet1K_RefV1 = WeightEntry(...)
 
 def resnet50(version: int = 1, weights: Optional[ResNet50Weights] = None) -> nn.Module:
     pass

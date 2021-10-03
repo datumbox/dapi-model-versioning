@@ -4,7 +4,7 @@ import warnings
 from functools import partial
 from typing import Any, Optional
 
-from ._api import register, Weights
+from ._api import register, Weights, WeightEntry
 from ..transforms.audio_presets import Text2Characters
 
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
@@ -40,25 +40,25 @@ _DEFAULT_PARAMETERS = {
 
 
 class Tacotron2Weights(Weights):
-    Characters_LJSpeech = (
+    Characters_LJSpeech = WeightEntry(
         'https://download.pytorch.org/models/audio/tacotron2_english_characters_1500_epochs_ljspeech.pth',
         partial(Text2Characters, symbols="_-!'(),.:;? abcdefghijklmnopqrstuvwxyz"),
         {'lang': 'en', 'epochs': 1500, 'n_symbol': 38},
         True
     )
-    Characters_WaveRNN_LJSpeech = (
+    Characters_WaveRNN_LJSpeech = WeightEntry(
         'https://download.pytorch.org/models/audio/tacotron2_english_characters_1500_epochs_wavernn_ljspeech.pth',
         partial(Text2Characters, symbols="_-!'(),.:;? abcdefghijklmnopqrstuvwxyz"),
         {'lang': 'en', 'epochs': 1500, 'n_symbol': 38},
         True
     )
-    Phonemes_LJSpeech = (
+    Phonemes_LJSpeech = WeightEntry(
         'https://download.pytorch.org/models/audio/tacotron2_english_phonemes_1500_epochs_ljspeech.pth',
         None,  # Phonemes preprocessing goes here
         {'lang': 'en', 'epochs': 1500, 'n_symbol': 96},
         True
     )
-    Phonemes_WaveRNN_LJSpeech = (
+    Phonemes_WaveRNN_LJSpeech = WeightEntry(
         'https://download.pytorch.org/models/audio/tacotron2_english_phonemes_1500_epochs_wavernn_ljspeech.pth',
         None,  # Phonemes preprocessing goes here
         {'lang': 'en', 'epochs': 1500, 'n_symbol': 96},

@@ -3,7 +3,7 @@ import warnings
 from typing import Any, Optional
 
 from . import resnet
-from ._api import register, ContextParams, Weights
+from ._api import register, ContextParams, Weights, WeightEntry
 from .resnet import ResNet50Weights
 from ..datasets.mock import Coco
 from ..transforms.vision_presets import CocoEval
@@ -64,7 +64,7 @@ def _resnet_fpn_backbone(
 
 
 class FasterRCNNResNet50FPNWeights(Weights):
-    Coco_RefV1 = (
+    Coco_RefV1 = WeightEntry(
         'https://download.pytorch.org/models/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth',
         CocoEval,
         {'classes': Coco.classes,
