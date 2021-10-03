@@ -40,6 +40,9 @@ class WeightEntry:
     meta: Dict[str, Any]
     latest: bool
 
+    def state_dict(self, progress: bool) -> Dict[str, Any]:
+        return load_state_dict_from_url(self.url, progress=progress)
+
 
 class Weights(Enum):
     """
@@ -59,7 +62,7 @@ class Weights(Enum):
 
     @classmethod
     def check_type(cls, obj: Any) -> None:
-        if obj is not None and not isinstance(obj, cls):
+        if obj is not None and not isinstance(obj, cls) and not isinstance(obj, WeightEntry):
             raise TypeError(f"Invalid Weight class provided; expected {cls.__name__} "
                             f"but received {obj.__class__.__name__}.")
 
@@ -71,7 +74,7 @@ class Weights(Enum):
         if not self.latest:
             warnings.warn(f"The selected weights are not the latest. For best performance "
                           f"choose one of the latest weights: {self.get_latest()}")
-        return load_state_dict_from_url(self.url, progress=progress)
+        return self.value.state_dict(progress)
 
     def __repr__(self):
         return f"{self.__class__.__name__}.{self._name_}"

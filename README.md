@@ -266,16 +266,16 @@ that we had to address in the past:
 3. [Code change which affects the model behaviour but architecture remains the same (BC-breaking)](https://github.com/datumbox/dapi-model-versioning/blob/main/examples/scenario3.py)
 
 Our proposal consists of the following key components:
-- The [Weights](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L44-L84) Enum and
-  the [WeightEntry](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L17-L41) data
+- The [Weights](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L47-L87) Enum and
+  the [WeightEntry](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L17-L44) data
   class which store crucial information about the pre-trained weights.
 - The [model builder methods](https://github.com/datumbox/dapi-model-versioning/blob/main/examples/scenario1.py#L78-L96)
   which construct the model variants and load the pre-trained weights.
 
 We also offer two optional components:
-- The [ContextParams](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L87-L145) class
-  which allows us to minimize the effects of BC-breaking changes to classes such as Layers and Modules.
-- A [Registration](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L148-L233)
+- The [ContextParams](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L90-L148) 
+  class which allows us to minimize the effects of BC-breaking changes to classes such as Layers and Modules.
+- A [Registration](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L151-L236)
   mechanism similar to the one used on the prototype datasets of 
   [TorchVision](https://github.com/pytorch/vision/blob/main/torchvision/prototype/datasets/_api.py) to show-case that
   our proposal is compatible with it.
@@ -284,7 +284,7 @@ We also offer two optional components:
 
 Here we briefly list the alternatives that we considered along with some of the reasons we didn't select them. Note that
 in all cases, we prefer using Enums to strings. To read more on why check this 
-[section](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L51-L53).
+[section](https://github.com/datumbox/dapi-model-versioning/blob/main/dapi_lib/models/_api.py#L54-L56).
 
 #### Single model builder and weights parameter for all code versions
 
