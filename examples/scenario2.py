@@ -24,7 +24,7 @@ Example:
 from torch import nn, Tensor
 from typing import Optional
 
-from dapi_lib.models._api import register, ContextParams, Weights
+from dapi_lib.models._api import register, ContextParams, Weights, WeightEntry
 
 # Import a few stuff that we plan to keep as-is to avoid copy-pasting
 from torchvision.ops.misc import FrozenBatchNorm2d
@@ -54,7 +54,7 @@ class Dummy(nn.Module):
 
 
 class DummyWeights(Weights):
-    DUMMY = (
+    DUMMY = WeightEntry(
         'https://fake/models/dummy_weights.pth',
         None,
         {},

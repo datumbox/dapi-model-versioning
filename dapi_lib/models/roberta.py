@@ -3,17 +3,17 @@ from transformers import RobertaTokenizer, RobertaModel
 from functools import partial
 from torch import nn
 
-from ._api import register, Weights
+from ._api import register, Weights, WeightEntry
 
 
 class RobertaWeights(Weights):
-    BASE = (
+    BASE = WeightEntry(
         'roberta-base',
         lambda: partial(RobertaTokenizer.from_pretrained('roberta-base'), return_tensors='pt'),
         {'params': 125_000_000},
         True
     )
-    LARGE = (
+    LARGE = WeightEntry(
         'roberta-large',
         lambda: partial(RobertaTokenizer.from_pretrained('roberta-large'), return_tensors='pt'),
         {'params': 355_000_000},

@@ -26,7 +26,7 @@ Example:
 from torch import nn, Tensor
 from typing import Optional
 
-from dapi_lib.models._api import register, ContextParams, Weights
+from dapi_lib.models._api import register, ContextParams, Weights, WeightEntry
 
 
 __all__ = ['BCBreaking']
@@ -57,13 +57,13 @@ class BCBreaking(nn.Module):
 
 
 class BCBreakingWeights(Weights):
-    OLD = (
+    OLD = WeightEntry(
         'https://download.pytorch.org/models/old_weights.pth',
         None,
         {},
         False
     )
-    NEW = (
+    NEW = WeightEntry(
         'https://fake/models/new_weights.pth',
         None,
         {},

@@ -2,7 +2,7 @@ import contextlib
 import sys
 import warnings
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from enum import Enum
 from inspect import signature
 from typing import Any, Callable, Dict, List, Optional, Tuple, get_args
@@ -11,20 +11,15 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, get_args
 from torchvision._internally_replaced_utils import load_state_dict_from_url
 
 
-__all__ = ['Weights', 'ContextParams', 'get', 'list', 'register']
+__all__ = ['Weights', 'WeightEntry', 'ContextParams', 'get', 'list', 'register']
 
 
 @dataclass
-class Weights(Enum):
+class WeightEntry:
     """
-    This class is the parent class of all model weights. Each model building method receives an optional `weights`
-    parameter with its associated pre-trained weights.
+    This class is used to group important attributes associated with the pre-trained weights.
 
-    The class inherits both from `Enum` and from `dataclass`. Enums enable us to associate the right model weight with
-    the right model building method. Moreover the use of data classes allows us to associate easier each weight to its
-    linked attributes.
-
-    The current implementation is an illustration of how one can use the Weights class. Adding, removing and adapting
+    The current implementation is an illustration of how one can define the WeightEntry. Adding, removing and adapting
     the attributes to meet the needs of each library is essential. This example implementation suggests using the
     following attributes:
         url (str): The location where we find the weights. Can be adapted to facilitate integration with manifold.
@@ -39,6 +34,19 @@ class Weights(Enum):
         latest (bool): An boolean indicator which encodes whether the specific set of weights is the best available for
             the given model/dataset/taxonomy combination. If `False`, the API shows a warning to the user prompting
             them to switch their weights to the latest ones.
+    """
+    url: str
+    transforms: Callable
+    meta: Dict[str, Any]
+    latest: bool
+
+
+class Weights(Enum):
+    """
+    This class is the parent class of all model weights. Each model building method receives an optional `weights`
+    parameter with its associated pre-trained weights.
+
+    The class inherits from `Enum` and its values should be of type `WeightEntry`.
 
     The use of Enums rather than strings to encode the weight information is a fundamental property of the API. Enums
     allow for better typing and IDE integration, work well with static analysis tools and make documenting the available
@@ -46,10 +54,8 @@ class Weights(Enum):
     programmatically manipulate the meta-data of the pre-trained models, build automatically the docs and integrate
     easier with paperswithcode.com's model-index.
     """
-    url: str
-    transforms: Callable
-    meta: Dict[str, Any]
-    latest: bool
+    def __init__(self, value: WeightEntry):
+        self._value_ = value
 
     @classmethod
     def check_type(cls, obj: Any) -> None:
@@ -69,6 +75,13 @@ class Weights(Enum):
 
     def __repr__(self):
         return f"{self.__class__.__name__}.{self._name_}"
+
+    def __getattr__(self, name):
+        # Be able to fetch WeightEntry attributes directly f
+        for f in fields(WeightEntry):
+            if f.name == name:
+                return object.__getattribute__(self.value, name)
+        return super().__getattr__(name)
 
 
 class ContextParams(contextlib.ContextDecorator):
@@ -140,7 +153,7 @@ _MODEL_METHODS: Dict[str, Tuple[Callable, Optional[Weights]]] = {}
 
 # Special type of internal enum that signals the use of the latest weights
 class _LatestWeights(Weights):
-    LATEST = (None, None, None, None)
+    LATEST = WeightEntry(None, None, None, None)
 
 
 def get(name: str, weights: Optional[Weights] = _LatestWeights.LATEST) -> Tuple[Callable, Optional[Weights]]:

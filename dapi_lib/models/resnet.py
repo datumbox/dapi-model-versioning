@@ -4,7 +4,7 @@ from functools import partial
 from torch import nn
 from typing import Any, Optional
 
-from ._api import register, Weights
+from ._api import register, Weights, WeightEntry
 from ..datasets.mock import ImageNet
 from ..transforms.vision_presets import ImageNetEval
 
@@ -44,14 +44,14 @@ def _resnet_v1_builder(arch: str, weights: Optional[Weights], progress: bool, **
 
 
 class ResNet50Weights(Weights):
-    ImageNet1K_RefV1 = (
+    ImageNet1K_RefV1 = WeightEntry(
         'https://download.pytorch.org/models/resnet50-0676ba61.pth',
         partial(ImageNetEval, crop_size=224),
         {'size': (224, 224), 'classes': ImageNet.classes,
          'recipe': 'https://github.com/pytorch/vision/tree/main/references/classification#resnext-50-32x4d'},
         False
     )
-    ImageNet1K_RefV2 = (
+    ImageNet1K_RefV2 = WeightEntry(
         'https://download.pytorch.org/models/resnet50-0676ba61.pth',  # pretend these weights are different
         partial(ImageNetEval, crop_size=224, interpolation=InterpolationMode.BICUBIC),
         {'size': (224, 224), 'classes': ImageNet.classes, 'recipe': None},
@@ -73,7 +73,7 @@ def resnet50(weights: Optional[ResNet50Weights] = None, progress: bool = True, *
 
 
 class ResNext101Weights(Weights):
-    ImageNet1K_RefV1 = (
+    ImageNet1K_RefV1 = WeightEntry(
         'https://download.pytorch.org/models/resnext101_32x8d-8ba56ff5.pth',
         partial(ImageNetEval, crop_size=224),
         {'size': (224, 224), 'classes': ImageNet.classes,
