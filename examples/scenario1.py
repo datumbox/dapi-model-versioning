@@ -22,7 +22,7 @@ import torch
 
 from functools import partial
 from torch import nn, Tensor
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from dapi_lib.models._api import register, Weights, WeightEntry
 from dapi_lib.transforms.vision_presets import ConvertImageDtype
@@ -110,7 +110,8 @@ class MySOTAV2Weights(Weights):
 # assessed on a case-by-case basis. See https://github.com/pytorch/vision/pull/1224 and
 # https://github.com/pytorch/pytorch/blob/294db060/torch/nn/quantized/dynamic/modules/linear.py#L44-L49
 @register
-def mysota_v2(weights: Optional[MySOTAV2Weights] = None, progress: bool = True, **kwargs: Any) -> MySOTA:
+def mysota_v2(weights: Optional[Union[MySOTAV2Weights, WeightEntry]] = None, progress: bool = True,
+              **kwargs: Any) -> MySOTA:
     # Confirm we got the right weights
     MySOTAV2Weights.check_type(weights)
 
@@ -134,3 +135,12 @@ if __name__ == "__main__":
     assert v1 == v2
 
     mysota_v2(MySOTAV2Weights.NOTHOTDOG)
+
+    # Ability to introduce and pass custom weights
+    custom_weights = WeightEntry(
+        'https://fake/models/my_custom_weights_v2.pth',
+        partial(ConvertImageDtype, dtype=torch.float16),
+        {'size': (32, 32), 'classes': ['not burger', 'burger']},
+        True
+    )
+    mysota_v2(custom_weights)

@@ -55,17 +55,18 @@ as it has previously been discussed by the domain library maintainers.
 
 In TorchVision, model versioning related issues have been handled on a case-by-case basis 
 [[8](https://github.com/pytorch/vision/issues/2599), [9](https://github.com/pytorch/vision/issues/2326), 
-[10](https://github.com/pytorch/vision/pull/3205), [11](https://github.com/pytorch/vision/pull/1224)]. We typically
-try to maintain BC as much as possible except in cases where the issue is considered a bug or extremely detrimental to
-the user experience. In the latter cases, we often deploy BC-breaking fixes but try to reduce the effects of the change
-as much as possible [[12](https://github.com/pytorch/vision/pull/2940)]. TorchAudio has only recently introduced the
-pre-trained models and their API is currently in beta. TorchText is currently working on introducing its first
-pre-trained models so their solution is in prototype phase. Finally, though PyTorch Core doesn't provide pre-trained
-models, occasionally there is the need of handling code changes on existing Layers and operators. These are typically
-handled with a mix of version parameters, deprecation warnings and method renamings
-[[13](https://github.com/pytorch/pytorch/blob/294db060/torch/nn/quantized/dynamic/modules/linear.py#L44-L49),
-[14](https://github.com/pytorch/pytorch/blob/c371542e/caffe2/python/cnn.py#L182-L183),
-[15](https://github.com/pytorch/pytorch/blob/c371542efc31b1abfe6f388042aa3ab0cef935f2/caffe2/python/brew.py#L65-L66)]
+[10](https://github.com/pytorch/vision/pull/3205), [11](https://github.com/pytorch/vision/pull/1224), 
+[12](https://github.com/pytorch/vision/pull/4487)]. We typically try to maintain BC as much as possible except in cases 
+where the issue is considered a bug or extremely detrimental to the user experience. In the latter cases, we often 
+deploy BC-breaking fixes but try to reduce the effects of the change as much as possible 
+[[13](https://github.com/pytorch/vision/pull/2940)]. TorchAudio has only recently introduced the pre-trained models and 
+their API is currently in beta. TorchText is currently working on introducing its first pre-trained models so their 
+solution is in prototype phase. Finally, though PyTorch Core doesn't provide pre-trained models, occasionally there is 
+the need of handling code changes on existing Layers and operators. These are typically handled with a mix of version 
+parameters, deprecation warnings and method renamings
+[[14](https://github.com/pytorch/pytorch/blob/294db060/torch/nn/quantized/dynamic/modules/linear.py#L44-L49),
+[15](https://github.com/pytorch/pytorch/blob/c371542e/caffe2/python/cnn.py#L182-L183),
+[16](https://github.com/pytorch/pytorch/blob/c371542efc31b1abfe6f388042aa3ab0cef935f2/caffe2/python/brew.py#L65-L66)]
 
 ## Repository structure
 
